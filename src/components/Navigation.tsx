@@ -10,7 +10,9 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const tabs = [
     { id: 'missas', label: '📅 Missas', icon: '🎵' },
     { id: 'musicos', label: '👥 Músicos', icon: '🎤' },
-    { id: 'biblioteca', label: '📚 Biblioteca', icon: '🎼' },
+    { id: 'musicas', label: '🎼 Músicas', icon: '📝' },
+    { id: 'buscar', label: '🔍 Buscar', icon: '🔎' },
+    { id: 'historico', label: '📚 Histórico', icon: '📋' },
   ];
 
   return (

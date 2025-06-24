@@ -9,7 +9,7 @@ export function useMissas() {
     const novaMissa: Missa = {
       ...missa,
       id: Date.now().toString(),
-      musicas: []
+      musicas: missa.musicas || []
     };
     setMissas(prev => [...prev, novaMissa]);
     return novaMissa.id;

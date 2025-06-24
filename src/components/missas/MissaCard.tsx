@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Users, Music } from 'lucide-react';
+import { Calendar, Clock, Users, Music, Eye } from 'lucide-react';
 import { Missa } from '../../types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -11,9 +11,10 @@ interface MissaCardProps {
   missa: Missa;
   onEdit: (missa: Missa) => void;
   onDelete: (id: string) => void;
+  onView?: (missa: Missa) => void;
 }
 
-export function MissaCard({ missa, onEdit, onDelete }: MissaCardProps) {
+export function MissaCard({ missa, onEdit, onDelete, onView }: MissaCardProps) {
   const dataFormatada = format(new Date(missa.data), 'dd/MM/yyyy', { locale: ptBR });
   const totalMusicas = missa.musicas.length;
 
@@ -54,6 +55,12 @@ export function MissaCard({ missa, onEdit, onDelete }: MissaCardProps) {
           )}
 
           <div className="flex gap-2 pt-2">
+            {onView && (
+              <Button onClick={() => onView(missa)} size="sm" variant="outline" className="flex-1">
+                <Eye className="h-4 w-4 mr-2" />
+                Ver
+              </Button>
+            )}
             <Button onClick={() => onEdit(missa)} size="sm" className="flex-1">
               Editar
             </Button>
