@@ -9,7 +9,270 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      biblioteca_musicas: {
+        Row: {
+          cantor: string | null
+          created_at: string
+          duracao: string | null
+          id: string
+          link_download: string | null
+          link_youtube: string | null
+          nome: string
+          observacoes: string | null
+          partitura: string | null
+          secao_liturgica: string | null
+          thumbnail: string | null
+          youtube_video_id: string | null
+        }
+        Insert: {
+          cantor?: string | null
+          created_at?: string
+          duracao?: string | null
+          id?: string
+          link_download?: string | null
+          link_youtube?: string | null
+          nome: string
+          observacoes?: string | null
+          partitura?: string | null
+          secao_liturgica?: string | null
+          thumbnail?: string | null
+          youtube_video_id?: string | null
+        }
+        Update: {
+          cantor?: string | null
+          created_at?: string
+          duracao?: string | null
+          id?: string
+          link_download?: string | null
+          link_youtube?: string | null
+          nome?: string
+          observacoes?: string | null
+          partitura?: string | null
+          secao_liturgica?: string | null
+          thumbnail?: string | null
+          youtube_video_id?: string | null
+        }
+        Relationships: []
+      }
+      missa_musicos: {
+        Row: {
+          created_at: string
+          id: string
+          missa_id: string
+          musico_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          missa_id: string
+          musico_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          missa_id?: string
+          musico_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missa_musicos_missa_id_fkey"
+            columns: ["missa_id"]
+            isOneToOne: false
+            referencedRelation: "missas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missa_musicos_musico_id_fkey"
+            columns: ["musico_id"]
+            isOneToOne: false
+            referencedRelation: "musicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missas: {
+        Row: {
+          created_at: string
+          data: string
+          horario: string
+          id: string
+          observacoes: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          horario: string
+          id?: string
+          observacoes?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          horario?: string
+          id?: string
+          observacoes?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      musicas: {
+        Row: {
+          cantor: string | null
+          created_at: string
+          id: string
+          link_download: string | null
+          link_youtube: string | null
+          missa_id: string
+          nome: string
+          observacoes: string | null
+          partitura: string | null
+          secao_liturgica: string
+          updated_at: string
+        }
+        Insert: {
+          cantor?: string | null
+          created_at?: string
+          id?: string
+          link_download?: string | null
+          link_youtube?: string | null
+          missa_id: string
+          nome: string
+          observacoes?: string | null
+          partitura?: string | null
+          secao_liturgica: string
+          updated_at?: string
+        }
+        Update: {
+          cantor?: string | null
+          created_at?: string
+          id?: string
+          link_download?: string | null
+          link_youtube?: string | null
+          missa_id?: string
+          nome?: string
+          observacoes?: string | null
+          partitura?: string | null
+          secao_liturgica?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "musicas_missa_id_fkey"
+            columns: ["missa_id"]
+            isOneToOne: false
+            referencedRelation: "missas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      musico_anotacoes: {
+        Row: {
+          created_at: string
+          id: string
+          musico_id: string
+          texto: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          musico_id: string
+          texto: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          musico_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "musico_anotacoes_musico_id_fkey"
+            columns: ["musico_id"]
+            isOneToOne: false
+            referencedRelation: "musicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      musico_sugestoes: {
+        Row: {
+          created_at: string
+          id: string
+          musico_id: string
+          status: string
+          texto: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          musico_id: string
+          status?: string
+          texto: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          musico_id?: string
+          status?: string
+          texto?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "musico_sugestoes_musico_id_fkey"
+            columns: ["musico_id"]
+            isOneToOne: false
+            referencedRelation: "musicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      musicos: {
+        Row: {
+          created_at: string
+          disponivel: boolean
+          email: string | null
+          foto: string | null
+          funcao: string
+          id: string
+          nome: string
+          observacoes_permanentes: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          disponivel?: boolean
+          email?: string | null
+          foto?: string | null
+          funcao: string
+          id?: string
+          nome: string
+          observacoes_permanentes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          disponivel?: boolean
+          email?: string | null
+          foto?: string | null
+          funcao?: string
+          id?: string
+          nome?: string
+          observacoes_permanentes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

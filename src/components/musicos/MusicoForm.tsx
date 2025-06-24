@@ -6,11 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Musico } from '../../types';
+import { SupabaseMusico } from '../../hooks/useSupabaseMusicos';
 
 interface MusicoFormProps {
-  musico?: Musico;
-  onSave: (musico: Omit<Musico, 'id' | 'anotacoes' | 'sugestoes'>) => void;
+  musico?: any; // Mantendo compatibilidade com formato antigo
+  onSave: (musico: Omit<SupabaseMusico, 'id' | 'created_at' | 'updated_at'>) => void;
   onCancel: () => void;
 }
 
@@ -19,11 +19,9 @@ export function MusicoForm({ musico, onSave, onCancel }: MusicoFormProps) {
     nome: musico?.nome || '',
     funcao: musico?.funcao || '',
     disponivel: musico?.disponivel ?? true,
-    contato: {
-      email: musico?.contato?.email || '',
-      telefone: musico?.contato?.telefone || '',
-    },
-    observacoesPermanentes: musico?.observacoesPermanentes || ''
+    email: musico?.contato?.email || musico?.email || '',
+    telefone: musico?.contato?.telefone || musico?.telefone || '',
+    observacoes_permanentes: musico?.observacoesPermanentes || musico?.observacoes_permanentes || ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -93,11 +91,8 @@ export function MusicoForm({ musico, onSave, onCancel }: MusicoFormProps) {
               <Input
                 id="email"
                 type="email"
-                value={formData.contato.email}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  contato: { ...formData.contato, email: e.target.value }
-                })}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
             <div>
@@ -105,11 +100,8 @@ export function MusicoForm({ musico, onSave, onCancel }: MusicoFormProps) {
               <Input
                 id="telefone"
                 type="tel"
-                value={formData.contato.telefone}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  contato: { ...formData.contato, telefone: e.target.value }
-                })}
+                value={formData.telefone}
+                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
               />
             </div>
           </div>
@@ -118,8 +110,8 @@ export function MusicoForm({ musico, onSave, onCancel }: MusicoFormProps) {
             <Label htmlFor="observacoes">Observações Permanentes</Label>
             <Textarea
               id="observacoes"
-              value={formData.observacoesPermanentes}
-              onChange={(e) => setFormData({ ...formData, observacoesPermanentes: e.target.value })}
+              value={formData.observacoes_permanentes}
+              onChange={(e) => setFormData({ ...formData, observacoes_permanentes: e.target.value })}
               placeholder="Ex: Prefere músicas com cifras simplificadas, toca melhor em tom de G..."
               rows={3}
             />

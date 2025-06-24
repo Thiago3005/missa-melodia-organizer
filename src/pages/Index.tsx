@@ -7,35 +7,41 @@ import { MissaDetalhes } from '../components/missas/MissaDetalhes';
 import { MusicoCard } from '../components/musicos/MusicoCard';
 import { MusicoForm } from '../components/musicos/MusicoForm';
 import { BuscarMusicas } from '../components/buscar/BuscarMusicas';
+import { BibliotecaMusicas } from '../components/musicas/BibliotecaMusicas';
 import { HistoricoMissas } from '../components/historico/HistoricoMissas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, Calendar, Users, Music, TrendingUp } from 'lucide-react';
-import { useMissas } from '../hooks/useMissas';
-import { useMusicos } from '../hooks/useMusicos';
-import { Missa, Musico } from '../types';
+import { useSupabaseMissas, SupabaseMissa } from '../hooks/useSupabaseMissas';
+import { useSupabaseMusicos, SupabaseMusico } from '../hooks/useSupabaseMusicos';
+import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('missas');
   const [showMissaForm, setShowMissaForm] = useState(false);
   const [showMusicoForm, setShowMusicoForm] = useState(false);
-  const [editingMissa, setEditingMissa] = useState<Missa | null>(null);
-  const [editingMusico, setEditingMusico] = useState<Musico | null>(null);
-  const [selectedMissa, setSelectedMissa] = useState<Missa | null>(null);
+  const [editingMissa, setEditingMissa] = useState<SupabaseMissa | null>(null);
+  const [editingMusico, setEditingMusico] = useState<SupabaseMusico | null>(null);
+  const [selectedMissa, setSelectedMissa] = useState<SupabaseMissa | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const {
     missas,
+    loading: loadingMissas,
     adicionarMissa,
     atualizarMissa,
     removerMissa,
+    fetchMusicasPorMissa,
     adicionarMusicaNaMissa,
     removerMusicaDaMissa
-  } = useMissas();
+  } = useSupabaseMissas();
 
   const {
     musicos,
+    anotacoes,
+    sugestoes,
+    loading: loadingMusicos,
     adicionarMusico,
     atualizarMusico,
     removerMusico,
@@ -43,23 +49,23 @@ const Index = () => {
     removerAnotacao,
     adicionarSugestao,
     atualizarStatusSugestao
-  } = useMusicos();
+  } = useSupabaseMusicos();
 
-  const handleSaveMissa = (missaData: Omit<Missa, 'id'>) => {
+  const handleSaveMissa = async (missaData: Omit<SupabaseMissa, 'id' | 'created_at' | 'updated_at'>) => {
     if (editingMissa) {
-      atualizarMissa(editingMissa.id, missaData);
+      await atualizarMissa(editingMissa.id, missaData);
     } else {
-      adicionarMissa(missaData);
+      await adicionarMissa(missaData);
     }
     setShowMissaForm(false);
     setEditingMissa(null);
   };
 
-  const handleSaveMusico = (musicoData: Omit<Musico, 'id' | 'anotacoes' | 'sugestoes'>) => {
+  const handleSaveMusico = async (musicoData: Omit<SupabaseMusico, 'id' | 'created_at' | 'updated_at'>) => {
     if (editingMusico) {
-      atualizarMusico(editingMusico.id, musicoData);
+      await atualizarMusico(editingMusico.id, musicoData);
     } else {
-      adicionarMusico(musicoData);
+      await adicionarMusico(musicoData);
     }
     setShowMusicoForm(false);
     setEditingMusico(null);
@@ -79,7 +85,7 @@ const Index = () => {
     totalMissas: missas.length,
     totalMusicos: musicos.length,
     musicosDisponiveis: musicos.filter(m => m.disponivel).length,
-    sugestoesPendentes: musicos.reduce((acc, m) => acc + m.sugestoes.filter(s => s.status === 'pendente').length, 0)
+    sugestoesPendentes: Object.values(sugestoes).flat().filter(s => s.status === 'pendente').length
   };
 
   const hoje = new Date().toLocaleDateString('pt-BR', {
@@ -87,6 +93,32 @@ const Index = () => {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
+  });
+
+  // Converter dados do Supabase para o formato esperado pelos componentes existentes
+  const convertMissaForLegacy = (missa: SupabaseMissa) => ({
+    id: missa.id,
+    data: missa.data,
+    horario: missa.horario,
+    tipo: missa.tipo,
+    musicosEscalados: [], // Implementar quando necessário
+    musicas: [], // Será carregado dinamicamente
+    observacoes: missa.observacoes
+  });
+
+  const convertMusicoForLegacy = (musico: SupabaseMusico) => ({
+    id: musico.id,
+    nome: musico.nome,
+    funcao: musico.funcao,
+    disponivel: musico.disponivel,
+    contato: {
+      email: musico.email,
+      telefone: musico.telefone
+    },
+    foto: musico.foto,
+    anotacoes: anotacoes[musico.id]?.map(a => a.texto) || [],
+    sugestoes: sugestoes[musico.id] || [],
+    observacoesPermanentes: musico.observacoes_permanentes
   });
 
   return (
@@ -157,7 +189,7 @@ const Index = () => {
         )}
 
         {/* Barra de busca e ações - não mostrar na busca e histórico */}
-        {!['buscar', 'historico'].includes(activeTab) && !selectedMissa && (
+        {!['buscar', 'historico', 'musicas'].includes(activeTab) && !selectedMissa && (
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -190,14 +222,16 @@ const Index = () => {
           <div className="space-y-6">
             {selectedMissa ? (
               <MissaDetalhes
-                missa={selectedMissa}
-                onAddMusica={adicionarMusicaNaMissa}
+                missa={convertMissaForLegacy(selectedMissa)}
+                onAddMusica={async (missaId, musica) => {
+                  await adicionarMusicaNaMissa(missaId, musica);
+                }}
                 onRemoveMusica={removerMusicaDaMissa}
                 onBack={() => setSelectedMissa(null)}
               />
             ) : showMissaForm || editingMissa ? (
               <MissaForm
-                missa={editingMissa || undefined}
+                missa={editingMissa ? convertMissaForLegacy(editingMissa) : undefined}
                 onSave={handleSaveMissa}
                 onCancel={() => {
                   setShowMissaForm(false);
@@ -206,7 +240,13 @@ const Index = () => {
               />
             ) : (
               <>
-                {filteredMissas.length === 0 ? (
+                {loadingMissas ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <p>Carregando missas...</p>
+                    </CardContent>
+                  </Card>
+                ) : filteredMissas.length === 0 ? (
                   <Card>
                     <CardContent className="p-8 text-center">
                       <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -227,7 +267,7 @@ const Index = () => {
                     {filteredMissas.map((missa) => (
                       <MissaCard
                         key={missa.id}
-                        missa={missa}
+                        missa={convertMissaForLegacy(missa)}
                         onEdit={setEditingMissa}
                         onDelete={removerMissa}
                         onView={setSelectedMissa}
@@ -244,7 +284,7 @@ const Index = () => {
           <div className="space-y-6">
             {showMusicoForm || editingMusico ? (
               <MusicoForm
-                musico={editingMusico || undefined}
+                musico={editingMusico ? convertMusicoForLegacy(editingMusico) : undefined}
                 onSave={handleSaveMusico}
                 onCancel={() => {
                   setShowMusicoForm(false);
@@ -253,7 +293,13 @@ const Index = () => {
               />
             ) : (
               <>
-                {filteredMusicos.length === 0 ? (
+                {loadingMusicos ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <p>Carregando músicos...</p>
+                    </CardContent>
+                  </Card>
+                ) : filteredMusicos.length === 0 ? (
                   <Card>
                     <CardContent className="p-8 text-center">
                       <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -274,11 +320,14 @@ const Index = () => {
                     {filteredMusicos.map((musico) => (
                       <MusicoCard
                         key={musico.id}
-                        musico={musico}
+                        musico={convertMusicoForLegacy(musico)}
                         onEdit={setEditingMusico}
                         onDelete={removerMusico}
-                        onAddAnotacao={adicionarAnotacao}
-                        onRemoveAnotacao={removerAnotacao}
+                        onAddAnotacao={(musicoId, texto) => adicionarAnotacao(musicoId, texto)}
+                        onRemoveAnotacao={(musicoId, index) => {
+                          const anotacao = anotacoes[musicoId]?.[index];
+                          if (anotacao) removerAnotacao(anotacao.id, musicoId);
+                        }}
                         onAddSugestao={adicionarSugestao}
                         onUpdateSugestaoStatus={atualizarStatusSugestao}
                       />
@@ -290,24 +339,14 @@ const Index = () => {
           </div>
         )}
 
-        {activeTab === 'musicas' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>🎼 Biblioteca de Músicas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center py-8">
-                Em breve: Biblioteca completa de músicas litúrgicas com 
-                partituras, áudios e organização por categorias.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {activeTab === 'musicas' && <BibliotecaMusicas />}
 
         {activeTab === 'buscar' && <BuscarMusicas />}
         
-        {activeTab === 'historico' && <HistoricoMissas missas={missas} />}
+        {activeTab === 'historico' && <HistoricoMissas missas={missas.map(convertMissaForLegacy)} />}
       </main>
+      
+      <Toaster />
     </div>
   );
 };

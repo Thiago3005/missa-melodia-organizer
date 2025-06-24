@@ -6,11 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Missa } from '../../types';
+import { SupabaseMissa } from '../../hooks/useSupabaseMissas';
 
 interface MissaFormProps {
-  missa?: Missa;
-  onSave: (missa: Omit<Missa, 'id' | 'musicas'>) => void;
+  missa?: any; // Mantendo compatibilidade com formato antigo
+  onSave: (missa: Omit<SupabaseMissa, 'id' | 'created_at' | 'updated_at'>) => void;
   onCancel: () => void;
 }
 
@@ -19,7 +19,6 @@ export function MissaForm({ missa, onSave, onCancel }: MissaFormProps) {
     data: missa?.data || '',
     horario: missa?.horario || '',
     tipo: missa?.tipo || '',
-    musicosEscalados: missa?.musicosEscalados || [],
     observacoes: missa?.observacoes || ''
   });
 
