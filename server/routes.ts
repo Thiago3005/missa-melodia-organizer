@@ -195,6 +195,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Indisponibilidades routes
+  app.get("/api/indisponibilidades", authenticateToken, async (req, res) => {
+    try {
+      const indisponibilidades = await storage.getIndisponibilidades();
+      res.json(indisponibilidades);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch indisponibilidades" });
+    }
+  });
+
+  app.get("/api/musicos/:id/indisponibilidades", authenticateToken, async (req, res) => {
+    try {
+      const indisponibilidades = await storage.getIndisponibilidadesByMusicoId(req.params.id);
+      res.json(indisponibilidades);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch indisponibilidades" });
+    }
+  });
+
+  app.post("/api/indisponibilidades", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const indisponibilidade = await storage.createIndisponibilidade(req.body);
+      res.json(indisponibilidade);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create indisponibilidade" });
+    }
+  });
+
+  app.put("/api/indisponibilidades/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      const indisponibilidade = await storage.updateIndisponibilidade(req.params.id, req.body);
+      res.json(indisponibilidade);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update indisponibilidade" });
+    }
+  });
+
+  app.delete("/api/indisponibilidades/:id", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteIndisponibilidade(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete indisponibilidade" });
+    }
+  });
+
   // Music search routes
   app.get("/api/search/music", authenticateToken, async (req, res) => {
     try {

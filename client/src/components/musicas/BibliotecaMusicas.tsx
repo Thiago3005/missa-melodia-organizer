@@ -34,12 +34,12 @@ export function BibliotecaMusicas() {
 
   const downloadMp3 = (musica: BibliotecaMusica) => {
     if (musica.youtube_video_id) {
-      const converterUrl = `https://www.y2mate.com/youtube/${musica.youtube_video_id}`;
+      const converterUrl = `https://cnvmp3.com/v25/${musica.youtube_video_id}`;
       window.open(converterUrl, '_blank');
     } else if (musica.link_youtube) {
       const videoId = musica.link_youtube.split('watch?v=')[1]?.split('&')[0];
       if (videoId) {
-        const converterUrl = `https://www.y2mate.com/youtube/${videoId}`;
+        const converterUrl = `https://cnvmp3.com/v25/${videoId}`;
         window.open(converterUrl, '_blank');
       }
     }

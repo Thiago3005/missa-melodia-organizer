@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "./db";
 import { 
-  users, musicos, missas, musicas, bibliotecaMusicas, musicoAnotacoes, musicoSugestoes, missaMusicos,
+  users, musicos, missas, musicas, bibliotecaMusicas, musicoAnotacoes, musicoSugestoes, missaMusicos, musicoIndisponibilidade,
   type User, type InsertUser, type Musico, type InsertMusico, type Missa, type InsertMissa,
   type Musica, type InsertMusica, type BibliotecaMusica, type InsertBibliotecaMusica
 } from "@shared/schema";
@@ -45,6 +45,13 @@ export interface IStorage {
   getSugestoesByMusicoId(musicoId: string): Promise<any[]>;
   createSugestao(musicoId: string, texto: string): Promise<any>;
   updateSugestaoStatus(id: string, status: string): Promise<any>;
+  
+  // Indisponibilidades
+  getIndisponibilidades(): Promise<any[]>;
+  getIndisponibilidadesByMusicoId(musicoId: string): Promise<any[]>;
+  createIndisponibilidade(data: any): Promise<any>;
+  updateIndisponibilidade(id: string, data: any): Promise<any>;
+  deleteIndisponibilidade(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -167,6 +174,37 @@ export class DatabaseStorage implements IStorage {
   async updateSugestaoStatus(id: string, status: string): Promise<any> {
     const result = await db.update(musicoSugestoes).set({ status }).where(eq(musicoSugestoes.id, id)).returning();
     return result[0];
+  }
+
+  // Indisponibilidades
+  async getIndisponibilidades(): Promise<any[]> {
+    return db.select().from(musicoIndisponibilidade).orderBy(desc(musicoIndisponibilidade.created_at));
+  }
+
+  async getIndisponibilidadesByMusicoId(musicoId: string): Promise<any[]> {
+    return db.select().from(musicoIndisponibilidade)
+      .where(eq(musicoIndisponibilidade.musico_id, musicoId))
+      .orderBy(desc(musicoIndisponibilidade.data_inicio));
+  }
+
+  async createIndisponibilidade(data: any): Promise<any> {
+    const result = await db.insert(musicoIndisponibilidade)
+      .values(data)
+      .returning();
+    return result[0];
+  }
+
+  async updateIndisponibilidade(id: string, data: any): Promise<any> {
+    const result = await db.update(musicoIndisponibilidade)
+      .set({ ...data, updated_at: new Date() })
+      .where(eq(musicoIndisponibilidade.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteIndisponibilidade(id: string): Promise<void> {
+    await db.delete(musicoIndisponibilidade)
+      .where(eq(musicoIndisponibilidade.id, id));
   }
 }
 

@@ -356,6 +356,62 @@ npm run type-check      # Verifica tipos TypeScript
 
 ---
 
+### 🔧 Configurações Importantes
+
+### API Keys e Secrets
+- **YouTube API Key:** `AIzaSyB4UJR8RSCxKjcMFwUD7vdTJRGd5ADVrQM`
+- **JWT_SECRET:** Gere uma chave segura para produção
+- **SESSION_SECRET:** Gere uma chave segura para sessões
+
+### Recursos Externos Integrados
+- **YouTube Data API v3:** Busca de vídeos e metadados
+- **Cifras e Partituras Goiânia:** Busca automática de partituras (https://arquidiocesegoiania.org.br/cifras-e-partituras/)
+- **CNV MP3:** Conversão de vídeos YouTube para MP3 (https://cnvmp3.com/v25/)
+
+### Funcionalidades Principais
+- ✅ Sistema de autenticação completo
+- ✅ Gestão de músicos e escalas
+- ✅ Biblioteca de músicas com busca inteligente
+- ✅ Integração YouTube para busca de vídeos
+- ✅ Sistema de partituras (texto e links)
+- ✅ Relatórios e histórico
+- ✅ Interface administrativa
+- ✅ Controle completo de disponibilidade dos músicos
+- ✅ Sistema de indisponibilidades com períodos e motivos
+- ✅ Verificação automática de disponibilidade para escalas
+
+### Sistema de Disponibilidade
+**Como funciona:**
+- Coordenador pode registrar indisponibilidades para qualquer músico
+- Motivos: Férias, Compromisso Pessoal, Outro (campo livre)
+- Períodos: Dia único ou intervalo de datas
+- Integração: Sistema verifica automaticamente disponibilidade ao escalar missas
+- Futuro: Músicos poderão fazer auto-registro de indisponibilidades
+
+**Hooks importantes:**
+- `useApi()` - Comunicação com backend
+- `useMissas()` - Gestão de missas e escalas
+- `useMusicos()` - Gestão de músicos
+- `useBibliotecaMusicas()` - Biblioteca de músicas
+
+### Estrutura do Banco
+**Tabelas principais:**
+- `auth_users` - Sistema de autenticação
+- `musicos` - Cadastro de músicos do coral
+- `missas` - Missas programadas
+- `musicas` - Músicas das missas
+- `biblioteca_musicas` - Biblioteca centralizada
+- `musico_indisponibilidade` - Controle de ausências
+- `musico_anotacoes` - Anotações sobre músicos
+- `musico_sugestoes` - Sugestões e aprovações
+
+### MP3 Download Integration
+- Utiliza serviço CNV MP3 para converter vídeos YouTube
+- Link automático gerado: `https://cnvmp3.com/v25/[VIDEO_ID]`
+- Disponível em todos os cards de música com link YouTube
+
+---
+
 ## 📞 Suporte
 Para dúvidas ou problemas, consulte:
 - Documentação do projeto no repositório

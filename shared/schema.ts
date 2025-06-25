@@ -71,6 +71,19 @@ export const musicoSugestoes = pgTable("musico_sugestoes", {
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Tabela de indisponibilidade dos músicos
+export const musicoIndisponibilidade = pgTable("musico_indisponibilidade", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  musico_id: uuid("musico_id").references(() => musicos.id, { onDelete: "cascade" }).notNull(),
+  data_inicio: date("data_inicio").notNull(),
+  data_fim: date("data_fim").notNull(),
+  motivo: text("motivo").notNull(), // ferias, compromisso_pessoal, outro
+  motivo_outro: text("motivo_outro"), // para quando motivo = 'outro'
+  observacoes: text("observacoes"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+});
+
 export const missas = pgTable("missas", {
   id: uuid("id").defaultRandom().primaryKey(),
   data: date("data").notNull(),
@@ -128,6 +141,7 @@ export const insertMusicoSchema = createInsertSchema(musicos);
 export const insertMissaSchema = createInsertSchema(missas);
 export const insertMusicaSchema = createInsertSchema(musicas);
 export const insertBibliotecaMusicaSchema = createInsertSchema(bibliotecaMusicas);
+export const insertMusicoIndisponibilidadeSchema = createInsertSchema(musicoIndisponibilidade);
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -139,3 +153,5 @@ export type Musica = typeof musicas.$inferSelect;
 export type InsertMusica = z.infer<typeof insertMusicaSchema>;
 export type BibliotecaMusica = typeof bibliotecaMusicas.$inferSelect;
 export type InsertBibliotecaMusica = z.infer<typeof insertBibliotecaMusicaSchema>;
+export type MusicoIndisponibilidade = typeof musicoIndisponibilidade.$inferSelect;
+export type InsertMusicoIndisponibilidade = z.infer<typeof insertMusicoIndisponibilidadeSchema>;

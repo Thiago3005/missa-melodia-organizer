@@ -5,61 +5,72 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, Edit, Trash2, User } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { Calendar, Clock, Plus, Edit, Trash2, CalendarDays, UserX } from 'lucide-react';
+import { useApi } from '@/hooks/useApi';
+import { toast } from 'sonner';
+import { format, parseISO, isWithinInterval } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-interface Disponibilidade {
+interface Musico {
+  id: string;
+  nome: string;
+  funcao: string;
+  disponivel: boolean;
+}
+
+interface Indisponibilidade {
   id: string;
   musico_id: string;
   data_inicio: string;
   data_fim: string;
-  motivo: string;
-  motivo_personalizado?: string;
+  motivo: 'ferias' | 'compromisso_pessoal' | 'outro';
+  motivo_outro?: string;
   observacoes?: string;
   created_at: string;
 }
 
-interface DisponibilidadeManagerProps {
-  musicoId: string;
-  musicoNome: string;
-  onClose: () => void;
-}
+const MOTIVOS = {
+  ferias: 'Férias',
+  compromisso_pessoal: 'Compromisso Pessoal',
+  outro: 'Outro'
+};
 
-export function DisponibilidadeManager({ musicoId, musicoNome, onClose }: DisponibilidadeManagerProps) {
-  const [disponibilidades, setDisponibilidades] = useState<Disponibilidade[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+export function DisponibilidadeManager() {
+  const [musicos, setMusicos] = useState<Musico[]>([]);
+  const [indisponibilidades, setIndisponibilidades] = useState<Indisponibilidade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<Indisponibilidade | null>(null);
+  const [selectedMusicoId, setSelectedMusicoId] = useState<string>('');
+  const { get, post, put, delete: del } = useApi();
 
   const [formData, setFormData] = useState({
-    data_inicio: '',
-    data_fim: '',
-    motivo: '',
-    motivo_personalizado: '',
+    musicoId: '',
+    dataInicio: '',
+    dataFim: '',
+    motivo: 'ferias' as 'ferias' | 'compromisso_pessoal' | 'outro',
+    motivoOutro: '',
     observacoes: ''
   });
 
-  const motivos = [
-    { value: 'ferias', label: 'Férias' },
-    { value: 'doenca', label: 'Doença' },
-    { value: 'compromisso_pessoal', label: 'Compromisso Pessoal' },
-    { value: 'outro', label: 'Outro' }
-  ];
-
   useEffect(() => {
-    fetchDisponibilidades();
-  }, [musicoId]);
+    fetchData();
+  }, []);
 
-  const fetchDisponibilidades = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch(`/api/musicos/${musicoId}/disponibilidade`);
-      if (response.ok) {
-        const data = await response.json();
-        setDisponibilidades(data);
-      }
+      setLoading(true);
+      const [musicosData, indisponibilidadesData] = await Promise.all([
+        get('/musicos'),
+        get('/indisponibilidades')
+      ]);
+      setMusicos(musicosData);
+      setIndisponibilidades(indisponibilidadesData);
     } catch (error) {
-      console.error('Erro ao buscar disponibilidades:', error);
+      console.error('Error fetching data:', error);
+      toast.error('Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
@@ -67,254 +78,193 @@ export function DisponibilidadeManager({ musicoId, musicoNome, onClose }: Dispon
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.data_inicio || !formData.data_fim || !formData.motivo) {
-      toast({
-        title: 'Atenção',
-        description: 'Preencha todos os campos obrigatórios',
-        variant: 'destructive'
-      });
-      return;
-    }
-
     try {
-      const url = editingId 
-        ? `/api/disponibilidade/${editingId}`
-        : `/api/musicos/${musicoId}/disponibilidade`;
-      
-      const method = editingId ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      const dataToSend = {
+        musico_id: formData.musicoId,
+        data_inicio: formData.dataInicio,
+        data_fim: formData.dataFim || formData.dataInicio,
+        motivo: formData.motivo,
+        motivo_outro: formData.motivoOutro,
+        observacoes: formData.observacoes
+      };
 
-      if (response.ok) {
-        toast({
-          title: 'Sucesso',
-          description: `Disponibilidade ${editingId ? 'atualizada' : 'registrada'} com sucesso!`
-        });
-        
-        resetForm();
-        fetchDisponibilidades();
+      if (editingItem) {
+        const updated = await put(`/indisponibilidades/${editingItem.id}`, dataToSend);
+        setIndisponibilidades(prev => prev.map(item => 
+          item.id === editingItem.id ? updated : item
+        ));
+        toast.success('Indisponibilidade atualizada com sucesso');
+      } else {
+        const newItem = await post('/indisponibilidades', dataToSend);
+        setIndisponibilidades(prev => [...prev, newItem]);
+        toast.success('Indisponibilidade registrada com sucesso');
       }
+      
+      resetForm();
     } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Falha ao salvar disponibilidade',
-        variant: 'destructive'
-      });
+      console.error('Error saving indisponibilidade:', error);
+      toast.error('Erro ao salvar indisponibilidade');
     }
-  };
-
-  const handleEdit = (disponibilidade: Disponibilidade) => {
-    setFormData({
-      data_inicio: disponibilidade.data_inicio,
-      data_fim: disponibilidade.data_fim,
-      motivo: disponibilidade.motivo,
-      motivo_personalizado: disponibilidade.motivo_personalizado || '',
-      observacoes: disponibilidade.observacoes || ''
-    });
-    setEditingId(disponibilidade.id);
-    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Deseja realmente remover esta indisponibilidade?')) return;
-
-    try {
-      const response = await fetch(`/api/disponibilidade/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        toast({
-          title: 'Sucesso',
-          description: 'Indisponibilidade removida com sucesso!'
-        });
-        fetchDisponibilidades();
+    if (window.confirm('Tem certeza que deseja excluir esta indisponibilidade?')) {
+      try {
+        await del(`/indisponibilidades/${id}`);
+        setIndisponibilidades(prev => prev.filter(item => item.id !== id));
+        toast.success('Indisponibilidade excluída com sucesso');
+      } catch (error) {
+        console.error('Error deleting indisponibilidade:', error);
+        toast.error('Erro ao excluir indisponibilidade');
       }
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Falha ao remover indisponibilidade',
-        variant: 'destructive'
-      });
     }
   };
 
   const resetForm = () => {
     setFormData({
-      data_inicio: '',
-      data_fim: '',
-      motivo: '',
-      motivo_personalizado: '',
+      musicoId: '',
+      dataInicio: '',
+      dataFim: '',
+      motivo: 'ferias',
+      motivoOutro: '',
       observacoes: ''
     });
-    setEditingId(null);
+    setEditingItem(null);
     setShowForm(false);
   };
 
-  const getMotivoLabel = (motivo: string, motivoPersonalizado?: string) => {
-    if (motivo === 'outro' && motivoPersonalizado) {
-      return motivoPersonalizado;
-    }
-    return motivos.find(m => m.value === motivo)?.label || motivo;
+  const handleEdit = (item: Indisponibilidade) => {
+    setFormData({
+      musicoId: item.musico_id,
+      dataInicio: item.data_inicio,
+      dataFim: item.data_fim,
+      motivo: item.motivo,
+      motivoOutro: item.motivo_outro || '',
+      observacoes: item.observacoes || ''
+    });
+    setEditingItem(item);
+    setShowForm(true);
   };
 
-  const getMotivoColor = (motivo: string) => {
-    switch (motivo) {
-      case 'ferias': return 'bg-blue-100 text-blue-800';
-      case 'doenca': return 'bg-red-100 text-red-800';
-      case 'compromisso_pessoal': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getMusicoNome = (musicoId: string) => {
+    const musico = musicos.find(m => m.id === musicoId);
+    return musico ? musico.nome : 'Músico não encontrado';
   };
+
+  const getIndisponibilidadesPorMusico = (musicoId: string) => {
+    return indisponibilidades.filter(item => item.musico_id === musicoId);
+  };
+
+  const formatDateRange = (dataInicio: string, dataFim: string) => {
+    const inicio = parseISO(dataInicio);
+    const fim = parseISO(dataFim);
+    
+    if (dataInicio === dataFim) {
+      return format(inicio, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    }
+    
+    return `${format(inicio, "dd 'de' MMMM", { locale: ptBR })} a ${format(fim, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`;
+  };
+
+  const isMusicicoIndisponivel = (musicoId: string, data: Date) => {
+    return indisponibilidades.some(item => {
+      if (item.musico_id !== musicoId) return false;
+      
+      const inicio = parseISO(item.data_inicio);
+      const fim = parseISO(item.data_fim);
+      
+      return isWithinInterval(data, { start: inicio, end: fim });
+    });
+  };
+
+  const filteredIndisponibilidades = selectedMusicoId 
+    ? indisponibilidades.filter(item => item.musico_id === selectedMusicoId)
+    : indisponibilidades;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <User className="h-6 w-6" />
-            Disponibilidade - {musicoNome}
-          </h2>
-          <p className="text-gray-600 mt-1">Gerencie as indisponibilidades do músico</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowForm(true)} className="bg-slate-900 hover:bg-slate-800">
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Indisponibilidade
-          </Button>
-          <Button variant="outline" onClick={onClose}>
-            Voltar
-          </Button>
-        </div>
+        <h1 className="text-3xl font-bold">Controle de Disponibilidade</h1>
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nova Indisponibilidade
+        </Button>
       </div>
 
-      {/* Formulário */}
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingId ? 'Editar' : 'Registrar'} Indisponibilidade
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="data_inicio">Data Início *</Label>
-                  <Input
-                    id="data_inicio"
-                    type="date"
-                    value={formData.data_inicio}
-                    onChange={(e) => setFormData({...formData, data_inicio: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="data_fim">Data Fim *</Label>
-                  <Input
-                    id="data_fim"
-                    type="date"
-                    value={formData.data_fim}
-                    onChange={(e) => setFormData({...formData, data_fim: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
+      {/* Filtro por músico */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label>Filtrar por músico:</Label>
+              <Select value={selectedMusicoId} onValueChange={setSelectedMusicoId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os músicos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos os músicos</SelectItem>
+                  {musicos.map((musico) => (
+                    <SelectItem key={musico.id} value={musico.id}>
+                      {musico.nome} - {musico.funcao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              <div>
-                <Label htmlFor="motivo">Motivo *</Label>
-                <Select value={formData.motivo} onValueChange={(value) => setFormData({...formData, motivo: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o motivo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {motivos.map(motivo => (
-                      <SelectItem key={motivo.value} value={motivo.value}>
-                        {motivo.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {formData.motivo === 'outro' && (
-                <div>
-                  <Label htmlFor="motivo_personalizado">Especificar Motivo *</Label>
-                  <Input
-                    id="motivo_personalizado"
-                    value={formData.motivo_personalizado}
-                    onChange={(e) => setFormData({...formData, motivo_personalizado: e.target.value})}
-                    placeholder="Descreva o motivo..."
-                    required
-                  />
-                </div>
-              )}
-
-              <div>
-                <Label htmlFor="observacoes">Observações</Label>
-                <Textarea
-                  id="observacoes"
-                  value={formData.observacoes}
-                  onChange={(e) => setFormData({...formData, observacoes: e.target.value})}
-                  placeholder="Observações adicionais (opcional)"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit">
-                  {editingId ? 'Atualizar' : 'Registrar'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Lista de Indisponibilidades */}
+      {/* Lista de indisponibilidades */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+            <CalendarDays className="h-5 w-5" />
             Indisponibilidades Registradas
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-center py-8">Carregando...</p>
-          ) : disponibilidades.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
-              Nenhuma indisponibilidade registrada
-            </p>
+            <div className="text-center py-8">Carregando...</div>
+          ) : filteredIndisponibilidades.length === 0 ? (
+            <div className="text-center py-8">
+              <UserX className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhuma indisponibilidade encontrada
+              </h3>
+              <p className="text-gray-600">
+                {selectedMusicoId 
+                  ? 'Este músico não possui indisponibilidades registradas'
+                  : 'Nenhuma indisponibilidade foi registrada ainda'
+                }
+              </p>
+            </div>
           ) : (
             <div className="space-y-4">
-              {disponibilidades.map((disponibilidade) => (
-                <div key={disponibilidade.id} className="flex items-center justify-between p-4 border rounded-lg">
+              {filteredIndisponibilidades.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge className={getMotivoColor(disponibilidade.motivo)}>
-                        {getMotivoLabel(disponibilidade.motivo, disponibilidade.motivo_personalizado)}
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-medium">{getMusicoNome(item.musico_id)}</h3>
+                      <Badge variant="outline">
+                        {MOTIVOS[item.motivo]}
                       </Badge>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <Calendar className="h-4 w-4" />
-                        {disponibilidade.data_inicio === disponibilidade.data_fim 
-                          ? new Date(disponibilidade.data_inicio).toLocaleDateString('pt-BR')
-                          : `${new Date(disponibilidade.data_inicio).toLocaleDateString('pt-BR')} até ${new Date(disponibilidade.data_fim).toLocaleDateString('pt-BR')}`
-                        }
-                      </div>
                     </div>
-                    {disponibilidade.observacoes && (
-                      <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
-                        {disponibilidade.observacoes}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDateRange(item.data_inicio, item.data_fim)}</span>
+                    </div>
+                    {item.motivo === 'outro' && item.motivo_outro && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        Motivo: {item.motivo_outro}
+                      </p>
+                    )}
+                    {item.observacoes && (
+                      <p className="text-sm text-gray-500 italic mt-1">
+                        {item.observacoes}
                       </p>
                     )}
                   </div>
@@ -322,14 +272,14 @@ export function DisponibilidadeManager({ musicoId, musicoNome, onClose }: Dispon
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleEdit(disponibilidade)}
+                      onClick={() => handleEdit(item)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleDelete(disponibilidade.id)}
+                      onClick={() => handleDelete(item.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -340,6 +290,129 @@ export function DisponibilidadeManager({ musicoId, musicoNome, onClose }: Dispon
           )}
         </CardContent>
       </Card>
+
+      {/* Resumo por músico */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Resumo por Músico</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {musicos.map((musico) => {
+              const indisponibilidadesDoMusico = getIndisponibilidadesPorMusico(musico.id);
+              return (
+                <div key={musico.id} className="p-4 border rounded-lg">
+                  <h4 className="font-medium mb-2">{musico.nome}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{musico.funcao}</p>
+                  <Badge variant={indisponibilidadesDoMusico.length === 0 ? 'default' : 'secondary'}>
+                    {indisponibilidadesDoMusico.length} indisponibilidade(s)
+                  </Badge>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Formulário */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingItem ? 'Editar Indisponibilidade' : 'Nova Indisponibilidade'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="musicoId">Músico</Label>
+              <Select value={formData.musicoId} onValueChange={(value) => setFormData({ ...formData, musicoId: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um músico" />
+                </SelectTrigger>
+                <SelectContent>
+                  {musicos.map((musico) => (
+                    <SelectItem key={musico.id} value={musico.id}>
+                      {musico.nome} - {musico.funcao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="dataInicio">Data de Início</Label>
+                <Input
+                  id="dataInicio"
+                  type="date"
+                  value={formData.dataInicio}
+                  onChange={(e) => setFormData({ ...formData, dataInicio: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="dataFim">Data de Fim (opcional)</Label>
+                <Input
+                  id="dataFim"
+                  type="date"
+                  value={formData.dataFim}
+                  onChange={(e) => setFormData({ ...formData, dataFim: e.target.value })}
+                  min={formData.dataInicio}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="motivo">Motivo</Label>
+              <Select value={formData.motivo} onValueChange={(value: any) => setFormData({ ...formData, motivo: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(MOTIVOS).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.motivo === 'outro' && (
+              <div>
+                <Label htmlFor="motivoOutro">Especificar motivo</Label>
+                <Input
+                  id="motivoOutro"
+                  value={formData.motivoOutro}
+                  onChange={(e) => setFormData({ ...formData, motivoOutro: e.target.value })}
+                  placeholder="Digite o motivo..."
+                  required
+                />
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="observacoes">Observações (opcional)</Label>
+              <Textarea
+                id="observacoes"
+                value={formData.observacoes}
+                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                placeholder="Observações adicionais..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={resetForm}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={!formData.musicoId || !formData.dataInicio}>
+                {editingItem ? 'Atualizar' : 'Salvar'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
