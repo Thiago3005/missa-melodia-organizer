@@ -469,6 +469,12 @@ const Index = () => {
             />
           )}
 
+          {activeTab === 'disponibilidade' && <DisponibilidadeManager />}
+
+          {activeTab === 'buscar' && <BuscarMusicas />}
+
+          {activeTab === 'biblioteca' && <BibliotecaMusicas />}
+
           {activeTab === 'musicas' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
