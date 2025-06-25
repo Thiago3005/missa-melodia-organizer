@@ -22,7 +22,7 @@ import { UserManagement } from '../components/admin/UserManagement';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Calendar, Users, Music, TrendingUp, Eye, Edit, Trash2, LogOut } from 'lucide-react';
+import { Plus, Search, Calendar, Users, Music, TrendingUp, Eye, Edit, Trash2, LogOut, Settings } from 'lucide-react';
 import { useSupabaseMissas, SupabaseMissa } from '../hooks/useApi';
 import { useSupabaseMusicos, SupabaseMusico } from '../hooks/useApi';
 import { Toaster } from '@/components/ui/toaster';
