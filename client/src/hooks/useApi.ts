@@ -360,3 +360,37 @@ export function useBibliotecaMusicas() {
     removerMusica,
   };
 }
+
+// General API hook for making HTTP requests
+export function useApi() {
+  const get = async (endpoint: string) => {
+    return apiRequest(endpoint);
+  };
+
+  const post = async (endpoint: string, data?: any) => {
+    return apiRequest(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  };
+
+  const put = async (endpoint: string, data?: any) => {
+    return apiRequest(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  };
+
+  const del = async (endpoint: string) => {
+    return apiRequest(endpoint, {
+      method: 'DELETE',
+    });
+  };
+
+  return {
+    get,
+    post,
+    put,
+    delete: del,
+  };
+}
