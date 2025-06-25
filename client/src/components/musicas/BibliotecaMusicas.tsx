@@ -6,29 +6,72 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Music, Search, Play, Download, Trash2, ExternalLink } from 'lucide-react';
-import { useBibliotecaMusicas, BibliotecaMusica } from '../../hooks/useApi';
-import { toast } from '@/hooks/use-toast';
+import { useApi } from '@/hooks/useApi';
+import { toast } from 'sonner';
 import { SECOES_LITURGICAS, SecaoLiturgica } from '../../types';
+
+interface BibliotecaMusica {
+  id: string;
+  nome: string;
+  cantor?: string;
+  link_youtube?: string;
+  secao_liturgica?: string;
+  thumbnail?: string;
+  duracao?: string;
+  youtube_video_id?: string;
+  partitura_texto?: string;
+  observacoes?: string;
+}
+
+type SecaoLiturgica = 'entrada' | 'ato_penitencial' | 'gloria' | 'salmo' | 'aclamacao' | 'ofertorio' | 'santo' | 'cordeiro' | 'comunhao' | 'final';
+
+const SECOES_LITURGICAS = {
+  entrada: 'Entrada',
+  ato_penitencial: 'Ato Penitencial',
+  gloria: 'Glória',
+  salmo: 'Salmo Responsorial',
+  aclamacao: 'Aclamação ao Evangelho',
+  ofertorio: 'Ofertório',
+  santo: 'Santo',
+  cordeiro: 'Cordeiro de Deus',
+  comunhao: 'Comunhão',
+  final: 'Final'
+};
 
 export function BibliotecaMusicas() {
   const [searchTerm, setSearchTerm] = useState('');
   const [secaoFiltro, setSecaoFiltro] = useState<SecaoLiturgica | 'todas'>('todas');
-  const { musicas, loading, removerMusica } = useBibliotecaMusicas();
+  const [musicas, setMusicas] = useState<BibliotecaMusica[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { get, delete: del } = useApi();
+
+  useEffect(() => {
+    fetchMusicas();
+  }, []);
+
+  const fetchMusicas = async () => {
+    try {
+      setLoading(true);
+      const data = await get('/biblioteca-musicas');
+      setMusicas(data);
+    } catch (error) {
+      console.error('Error fetching musicas:', error);
+      toast.error('Erro ao carregar músicas');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRemoverMusica = async (id: string) => {
-    try {
-      await removerMusica(id);
-      toast({
-        title: 'Sucesso',
-        description: 'Música removida da biblioteca!'
-      });
-    } catch (error) {
-      console.error('Erro ao remover música:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao remover música da biblioteca',
-        variant: 'destructive'
-      });
+    if (window.confirm('Tem certeza que deseja remover esta música da biblioteca?')) {
+      try {
+        await del(`/biblioteca-musicas/${id}`);
+        setMusicas(prev => prev.filter(m => m.id !== id));
+        toast.success('Música removida da biblioteca!');
+      } catch (error) {
+        console.error('Erro ao remover música:', error);
+        toast.error('Falha ao remover música da biblioteca');
+      }
     }
   };
 

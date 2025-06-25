@@ -221,7 +221,7 @@ const Index = () => {
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
           {activeTab === 'dashboard' && <Dashboard />}
-          
+
           {activeTab === 'missas' && (
             <div className="space-y-6">
               {/* Header */}
@@ -314,7 +314,7 @@ const Index = () => {
                                   {missa.data}
                                 </div>
                               </div>
-                              
+
                               <div className="space-y-1 text-sm text-gray-600">
                                 <p>Horário: {missa.horario}</p>
                                 <p>Músicos: 0 escalados</p>
@@ -480,10 +480,10 @@ const Index = () => {
                   <p className="text-gray-600 mt-1">Catálogo completo de músicas litúrgicas</p>
                 </div>
               </div>
-              
+
               <div className="space-y-6">
                 <PartituraSearch />
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
@@ -493,7 +493,7 @@ const Index = () => {
                       <BuscarMusicas />
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Biblioteca Salva</CardTitle>
