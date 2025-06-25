@@ -111,15 +111,26 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             {missas.slice(0, 5).map((missa) => (
-              <div key={missa.id} className="flex items-center justify-between py-3 border-b last:border-b-0">
-                <div>
-                  <p className="font-medium">{missa.tipo}</p>
-                  <p className="text-sm text-gray-600">{missa.data} - {missa.horario}</p>
-                </div>
-                <Button variant="outline" size="sm">
-                  Ver
-                </Button>
-              </div>
+              <Card key={missa.id} className="border-l-4 border-l-blue-500 mb-3">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{missa.tipo}</p>
+                      <p className="text-sm text-gray-600">{missa.data} - {missa.horario}</p>
+                      {missa.observacoes && (
+                        <p className="text-xs text-gray-500 mt-1">{missa.observacoes}</p>
+                      )}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.hash = '#missas'}
+                    >
+                      Ver
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
             {missas.length === 0 && (
               <p className="text-center text-gray-500 py-8">

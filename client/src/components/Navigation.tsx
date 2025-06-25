@@ -27,7 +27,9 @@ export function Navigation({ activeTab, onTabChange, userType = 'admin' }: Navig
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'missas', label: 'Missas', icon: Calendar },
     { id: 'musicos', label: 'Músicos', icon: Users },
-    { id: 'musicas', label: 'Músicas', icon: Music },
+    { id: 'biblioteca', label: 'Biblioteca', icon: Music },
+    { id: 'buscar', label: 'Buscar', icon: FileText },
+    { id: 'disponibilidade', label: 'Disponibilidade', icon: Calendar },
     { id: 'sugestoes', label: 'Sugestões', icon: MessageSquare },
     { id: 'relatorios', label: 'Relatórios', icon: FileText },
     { id: 'usuarios', label: 'Usuários', icon: Users }

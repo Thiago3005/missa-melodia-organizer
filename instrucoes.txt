@@ -379,6 +379,12 @@ npm run type-check      # Verifica tipos TypeScript
 - ✅ Controle completo de disponibilidade dos músicos
 - ✅ Sistema de indisponibilidades com períodos e motivos
 - ✅ Verificação automática de disponibilidade para escalas
+- ✅ Dashboard analítico com gráficos e métricas
+- ✅ Análise de missas por mês, músicos mais atuantes
+- ✅ Ranking de músicas mais usadas
+- ✅ Gráficos de disponibilidade do coral
+- ✅ Monitoramento de partes da missa carentes
+- ✅ Sistema de escala de músicos por missa
 
 ### Sistema de Disponibilidade
 **Como funciona:**
@@ -405,10 +411,42 @@ npm run type-check      # Verifica tipos TypeScript
 - `musico_anotacoes` - Anotações sobre músicos
 - `musico_sugestoes` - Sugestões e aprovações
 
+**SQL da tabela de indisponibilidades:**
+```sql
+CREATE TABLE musico_indisponibilidade (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  musico_id UUID NOT NULL REFERENCES musicos(id) ON DELETE CASCADE,
+  data_inicio DATE NOT NULL,
+  data_fim DATE NOT NULL,
+  motivo TEXT NOT NULL, -- 'ferias', 'compromisso_pessoal', 'outro'
+  motivo_outro TEXT, -- quando motivo = 'outro'
+  observacoes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+);
+```
+
 ### MP3 Download Integration
 - Utiliza serviço CNV MP3 para converter vídeos YouTube
 - Link automático gerado: `https://cnvmp3.com/v25/[VIDEO_ID]`
 - Disponível em todos os cards de música com link YouTube
+
+### Dashboard Analítico
+**Gráficos implementados:**
+- **Missas por mês:** Gráfico de barras mostrando quantidade de missas nos últimos 6 meses
+- **Músicos mais atuantes:** Ranking horizontal de participação por músico
+- **Sugestões por status:** Gráfico de pizza com pendentes, aprovadas e recusadas
+- **Músicas mais usadas:** Top 5 músicas mais frequentes em gráfico de colunas
+- **Disponibilidade do coral:** Gráfico de linha mostrando tendências de disponibilidade
+- **Partes da missa carentes:** Barras de progresso indicando preenchimento por seção
+
+### Sistema de Escala Musical
+**Por missa, controle de:**
+- Entrada, Kyrie, Gloria, Aclamação ao Evangelho
+- Ofertório, Sanctus, Comunhão, Saída
+- Back Vocal e observações específicas por parte
+- Seleção de músicos disponíveis para cada função
+- Verificação automática de conflitos de disponibilidade
 
 ---
 

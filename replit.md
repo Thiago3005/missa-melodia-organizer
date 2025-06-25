@@ -18,6 +18,17 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
 - **UI Components**: Shadcn/ui components
 
 ## Recent Changes
+- **2025-01-25**: Complete availability control and analytics implementation
+  - Added complete musician availability control with absence tracking
+  - Implemented separated YouTube search from intelligent sheet music search
+  - Fixed Dashboard "Ver" button navigation to missas tab
+  - Created individual cards for upcoming masses by date
+  - Added analytics dashboard with comprehensive charts and metrics
+  - Implemented musician assignment system for mass parts
+  - Enhanced MP3 download using cnvmp3.com/v25 service
+  - Added Disponibilidade tab to navigation
+  - Created analytics endpoint with mock data
+  - Updated documentation with SQL schemas and new features
 - **2025-01-25**: Complete system functionality implementation
   - Fixed UserManagement component import and authentication issues
   - Added comprehensive music library selector for missas
@@ -28,15 +39,6 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
   - Complete API authentication fixes and route protection
   - YouTube Data API v3 integration: AIzaSyB4UJR8RSCxKjcMFwUD7vdTJRGd5ADVrQM
   - Created comprehensive documentation files (instrucoes.txt, sql_esquema.txt)
-- **2025-01-24**: Migration to Replit completed
-  - Updated admin credentials: wijosi59@gmail.com / 88928883
-  - Implemented intelligent music search with YouTube integration
-  - Added Cifras e Partituras - Arquidiocese de Goiânia integration
-  - Added CNV MP3 download service integration
-  - Enhanced biblioteca with text-based sheet music field
-  - Fixed header date duplication issue
-  - Added "Últimas da Igreja" section for parish updates
-  - Database fully migrated and functional
 
 ## Features
 - Dashboard com métricas principais e visão geral
