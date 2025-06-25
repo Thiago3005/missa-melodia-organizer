@@ -11,6 +11,8 @@ import { BibliotecaMusicas } from '../components/musicas/BibliotecaMusicas';
 import { SugestoesManager } from '../components/sugestoes/SugestoesManager';
 import { RelatoriosManager } from '../components/relatorios/RelatoriosManager';
 import { HistoricoMissas } from '../components/historico/HistoricoMissas';
+import { DisponibilidadeManager } from '../components/disponibilidade/DisponibilidadeManager';
+import { PartituraSearch } from '../components/partituras/PartituraSearch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +29,7 @@ const Index = () => {
   const [editingMusico, setEditingMusico] = useState<SupabaseMusico | null>(null);
   const [selectedMissa, setSelectedMissa] = useState<SupabaseMissa | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [managingDisponibilidade, setManagingDisponibilidade] = useState<{musicoId: string, musicoNome: string} | null>(null);
 
   const {
     missas,
@@ -292,7 +295,7 @@ const Index = () => {
             </div>
           )}
 
-          {activeTab === 'musicos' && (
+          {activeTab === 'musicos' && !managingDisponibilidade && (
             <div className="space-y-6">
               {/* Header */}
               <div className="flex justify-between items-center">
@@ -381,6 +384,9 @@ const Index = () => {
                           onUpdateSugestaoStatus={async (sugestaoId, status) => {
                             await atualizarStatusSugestao(sugestaoId, status, musico.id);
                           }}
+                          onManageDisponibilidade={(musicoId, musicoNome) => {
+                            setManagingDisponibilidade({ musicoId, musicoNome });
+                          }}
                         />
                       ))}
                     </div>
@@ -388,6 +394,14 @@ const Index = () => {
                 </>
               )}
             </div>
+          )}
+
+          {managingDisponibilidade && (
+            <DisponibilidadeManager
+              musicoId={managingDisponibilidade.musicoId}
+              musicoNome={managingDisponibilidade.musicoNome}
+              onClose={() => setManagingDisponibilidade(null)}
+            />
           )}
 
           {activeTab === 'musicas' && (
@@ -402,24 +416,28 @@ const Index = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Buscar Músicas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <BuscarMusicas />
-                  </CardContent>
-                </Card>
+              <div className="space-y-6">
+                <PartituraSearch />
                 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Biblioteca</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <BibliotecaMusicas />
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Buscar no YouTube</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <BuscarMusicas />
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Biblioteca Salva</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <BibliotecaMusicas />
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           )}

@@ -29,12 +29,28 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
   - Real-time data synchronization focus
   - Modern layout with collapsible sidebar
   - Complete UI overhaul following user specifications
+- **2025-01-24**: Advanced features implementation
+  - Complete musician availability system with absence tracking
+  - Intelligent sheet music search with external integrations
+  - Enhanced music library with text-based sheet music storage
+  - Database schema extensions for availability and music assignments
+  - Improved UI for managing musician schedules and music resources
 
 ## Features
 - Dashboard com métricas principais e visão geral
 - Gestão completa de missas e escalas musicais
 - Cadastro e controle detalhado de músicos
-- Biblioteca integrada de músicas litúrgicas com busca no YouTube
+- Sistema completo de disponibilidade dos músicos
+  - Registro de ausências (férias, doença, compromisso pessoal, outro)
+  - Períodos de indisponibilidade com datas
+  - Verificação automática de disponibilidade por data
+  - Integração com seleção de músicos para missas
+- Biblioteca integrada de músicas litúrgicas
+  - Busca inteligente de partituras
+  - Integração com Cifras e Partituras - Arquidiocese de Goiânia
+  - Download de áudio via CNV MP3
+  - Campo de partitura em texto para cada música
+  - Busca no YouTube integrada
 - Sistema avançado de sugestões com workflow de aprovação
 - Relatórios e análises históricas com exportação PDF
 - Interface otimizada para coordenador único
