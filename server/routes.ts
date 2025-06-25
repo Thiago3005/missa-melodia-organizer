@@ -1,10 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { authRouter } from "./authRoutes";
+import { authenticateToken, requireAdmin, type AuthenticatedRequest } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth routes
+  app.use('/api/auth', authRouter);
+
   // Musicos routes
-  app.get("/api/musicos", async (req, res) => {
+  app.get("/api/musicos", authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
       const musicos = await storage.getMusicos();
       res.json(musicos);
@@ -13,7 +18,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/musicos", async (req, res) => {
+  app.post("/api/musicos", authenticateToken, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const musico = await storage.createMusico(req.body);
       res.json(musico);

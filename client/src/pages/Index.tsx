@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useAuth } from '../components/auth/AuthProvider';
+import { LoginForm } from '../components/auth/LoginForm';
 import { Navigation } from '../components/Navigation';
 import { Dashboard } from '../components/Dashboard';
 import { MissaCard } from '../components/missas/MissaCard';
@@ -22,7 +24,10 @@ import { useSupabaseMusicos, SupabaseMusico } from '../hooks/useApi';
 import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
+  const { user, loading: authLoading, login, logout, isAuthenticated, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
   const [showMissaForm, setShowMissaForm] = useState(false);
   const [showMusicoForm, setShowMusicoForm] = useState(false);
   const [editingMissa, setEditingMissa] = useState<SupabaseMissa | null>(null);
@@ -100,6 +105,47 @@ const Index = () => {
     day: 'numeric'
   });
 
+  // Handle login
+  const handleLogin = async (email: string, password: string) => {
+    setLoginLoading(true);
+    setLoginError('');
+    try {
+      await login(email, password);
+    } catch (error: any) {
+      setLoginError(error.message || 'Erro no login');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-slate-900"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <LoginForm 
+        onLogin={handleLogin}
+        loading={loginLoading}
+        error={loginError}
+      />
+    );
+  }
+
   // Converter dados para o formato esperado pelos componentes existentes
   const convertMissaForLegacy = (missa: SupabaseMissa) => ({
     id: missa.id,
@@ -129,7 +175,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Navigation */}
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        userType={user?.tipo}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -144,10 +194,24 @@ const Index = () => {
                 <p className="text-sm text-gray-600">
                   Organização completa para missas católicas - Boa Viagem
                 </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Logado como: {user?.nome} ({user?.tipo === 'admin' ? 'Administrador' : 'Músico'})
+                </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Hoje</p>
-                <p className="text-lg font-medium capitalize">{hoje}</p>
+              <div className="text-right flex items-center gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Hoje</p>
+                  <p className="text-lg font-medium capitalize">{hoje}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </Button>
               </div>
             </div>
           </div>
@@ -442,8 +506,9 @@ const Index = () => {
             </div>
           )}
 
-          {activeTab === 'sugestoes' && <SugestoesManager />}
-          {activeTab === 'relatorios' && <RelatoriosManager />}
+          {activeTab === 'sugestoes' && isAdmin && <SugestoesManager />}
+          {activeTab === 'relatorios' && isAdmin && <RelatoriosManager />}
+          {activeTab === 'usuarios' && isAdmin && <UserManagement />}
         </main>
       </div>
 

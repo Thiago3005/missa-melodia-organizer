@@ -16,19 +16,32 @@ import { useState } from 'react';
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  userType?: 'admin' | 'musico';
+  userType?: 'admin' | 'musico';
 }
 
-export function Navigation({ activeTab, onTabChange }: NavigationProps) {
+export function Navigation({ activeTab, onTabChange, userType = 'admin' }: NavigationProps) {
   const [collapsed, setCollapsed] = useState(false);
 
-  const tabs = [
+  // Tabs baseadas no tipo de usuário
+  const adminTabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'missas', label: 'Missas', icon: Calendar },
     { id: 'musicos', label: 'Músicos', icon: Users },
     { id: 'musicas', label: 'Músicas', icon: Music },
     { id: 'sugestoes', label: 'Sugestões', icon: MessageSquare },
-    { id: 'relatorios', label: 'Relatórios', icon: FileText }
+    { id: 'relatorios', label: 'Relatórios', icon: FileText },
+    { id: 'usuarios', label: 'Usuários', icon: Users }
   ];
+
+  const musicoTabs = [
+    { id: 'minhas-missas', label: 'Minhas Missas', icon: Calendar },
+    { id: 'meu-perfil', label: 'Meu Perfil', icon: Users },
+    { id: 'disponibilidade', label: 'Disponibilidade', icon: Calendar },
+    { id: 'musicas', label: 'Partituras', icon: Music }
+  ];
+
+  const tabs = userType === 'admin' ? adminTabs : musicoTabs;
 
   return (
     <div className={cn(
