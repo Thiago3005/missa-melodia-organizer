@@ -390,6 +390,12 @@ npm run type-check      # Verifica tipos TypeScript
 - ✅ Seleção de partes da missa para cada músico (entrada, kyrie, gloria, aclamação, ofertório, sanctus, comunhão, saída)
 - ✅ Integração YouTube com busca separada de partituras
 - ✅ Interface aprimorada com tabs para diferentes tipos de busca
+- ✅ Tema claro implementado como padrão com melhor contraste
+- ✅ Cards com cantos arredondados (8px) e sombras suaves
+- ✅ Fundo levemente cinza-claro para melhor legibilidade
+- ✅ Botões com contraste adequado e tipografia clara
+- ✅ Toggle de tema claro/escuro disponível na sidebar
+- ✅ Interface otimizada para usuários mais velhos
 
 ### Sistema de Disponibilidade
 **Como funciona:**

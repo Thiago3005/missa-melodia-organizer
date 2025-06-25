@@ -6,7 +6,10 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
 ## User Preferences
 - Interface otimizada para administrador único (coordenador do coral)
 - Fluxos simples, rápidos e sem distrações
-- Layout moderno com sidebar azul escuro (#0F172A)
+- Layout moderno com tema claro por padrão e opção de tema escuro
+- Contraste adequado para leitura fácil, especialmente para usuários mais velhos
+- Cards com cantos arredondados (8px) e sombras suaves
+- Fundo levemente cinza-claro (#f7f7f7) para melhor contraste
 - Dados sempre sincronizados em tempo real
 - Sem necessidade de login multiusuário no momento
 
