@@ -43,7 +43,7 @@ export function DisponibilidadeManager() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<Indisponibilidade | null>(null);
-  const [selectedMusicoId, setSelectedMusicoId] = useState<string>('');
+  const [selectedMusicoId, setSelectedMusicoId] = useState<string>('todos');
   const { get, post, put, delete: del } = useApi();
 
   const [formData, setFormData] = useState({
@@ -177,7 +177,7 @@ export function DisponibilidadeManager() {
     });
   };
 
-  const filteredIndisponibilidades = selectedMusicoId 
+  const filteredIndisponibilidades = selectedMusicoId && selectedMusicoId !== 'todos'
     ? indisponibilidades.filter(item => item.musico_id === selectedMusicoId)
     : indisponibilidades;
 
@@ -205,7 +205,7 @@ export function DisponibilidadeManager() {
                   <SelectValue placeholder="Todos os músicos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os músicos</SelectItem>
+                  <SelectItem value="todos">Todos os músicos</SelectItem>
                   {musicos.map((musico) => (
                     <SelectItem key={musico.id} value={musico.id}>
                       {musico.nome} - {musico.funcao}
@@ -236,7 +236,7 @@ export function DisponibilidadeManager() {
                 Nenhuma indisponibilidade encontrada
               </h3>
               <p className="text-gray-600">
-                {selectedMusicoId 
+                {selectedMusicoId && selectedMusicoId !== 'todos'
                   ? 'Este músico não possui indisponibilidades registradas'
                   : 'Nenhuma indisponibilidade foi registrada ainda'
                 }
