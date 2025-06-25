@@ -14,6 +14,7 @@ import { BibliotecaMusicas } from '../components/musicas/BibliotecaMusicas';
 import { SugestoesManager } from '../components/sugestoes/SugestoesManager';
 import { AnalyticsDashboard } from '../components/relatorios/AnalyticsDashboard';
 import { EscalarMusicoModal } from '../components/missas/EscalarMusicoModal';
+import { EscalacoesDefault } from '../components/missas/EscalacoesDefault';
 import { HistoricoMissas } from '../components/historico/HistoricoMissas';
 import { DisponibilidadeManager } from '../components/disponibilidade/DisponibilidadeManager';
 import { PartituraSearch } from '../components/partituras/PartituraSearch';
@@ -38,6 +39,7 @@ const Index = () => {
   const [selectedMissa, setSelectedMissa] = useState<SupabaseMissa | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showEscalarMusico, setShowEscalarMusico] = useState(false);
+  const [showEscalacaoDefault, setShowEscalacaoDefault] = useState(false);
   const [managingDisponibilidade, setManagingDisponibilidade] = useState<{musicoId: string, musicoNome: string} | null>(null);
 
   const {
@@ -236,13 +238,23 @@ const Index = () => {
                   </h1>
                   <p className="text-gray-600 mt-1">Gerencie todas as missas e escalas</p>
                 </div>
-                <Button 
-                  onClick={() => setShowMissaForm(true)}
-                  className="bg-slate-900 hover:bg-slate-800"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Missa
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => setShowEscalacaoDefault(true)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Escalações Padrão
+                  </Button>
+                  <Button 
+                    onClick={() => setShowMissaForm(true)}
+                    className="bg-slate-900 hover:bg-slate-800"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Missa
+                  </Button>
+                </div>
               </div>
 
               {/* Search */}
@@ -335,14 +347,29 @@ const Index = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setSelectedMissa(missa)}
+                                  className="flex-1"
                                 >
-                                  <Eye className="h-4 w-4" />
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Ver
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => {
+                                    setSelectedMissa(missa);
+                                    setShowEscalarMusico(true);
+                                  }}
+                                  className="flex-1"
+                                >
+                                  Escalar
                                 </Button>
                                 <Button
                                   size="sm"
                                   onClick={() => setEditingMissa(missa)}
+                                  className="flex-1"
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Editar
                                 </Button>
                                 <Button
                                   size="sm"
@@ -538,6 +565,16 @@ const Index = () => {
           }}
         />
       )}
+
+      {/* Modal de Escalações Padrão */}
+      <EscalacoesDefault
+        isOpen={showEscalacaoDefault}
+        onClose={() => setShowEscalacaoDefault(false)}
+        onAplicarDefault={() => {
+          // Esta funcionalidade será implementada quando uma missa específica for selecionada
+          toast.info('Selecione uma missa específica para aplicar escalação padrão');
+        }}
+      />
     </div>
   );
 };

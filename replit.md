@@ -40,6 +40,12 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
   - Improved dashboard navigation and "Nova missa" button functionality
   - Enhanced card styling with rounded corners and subtle shadows
   - Optimized interface contrast for better readability
+- **2025-01-25**: Enhanced musician scheduling system
+  - Fixed dark theme background and card styling issues
+  - Added prominent "Escalar" buttons to mass cards for easy musician assignment
+  - Created default assignment system to save frequently used musician configurations
+  - Implemented quick assignment feature to avoid repetitive scheduling
+  - Added "Escalações Padrão" management interface with save/apply functionality
 - **2025-01-25**: Complete system functionality implementation
   - Fixed UserManagement component import and authentication issues
   - Added comprehensive music library selector for missas

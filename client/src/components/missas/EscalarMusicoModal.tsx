@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Music, Users, Mic, Guitar } from 'lucide-react';
+import { Music, Users, Mic, Guitar, Settings } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { toast } from 'sonner';
+import { EscalacoesDefault } from './EscalacoesDefault';
 
 interface Musico {
   id: string;
@@ -23,6 +24,15 @@ interface EscalarMusicoModalProps {
   onClose: () => void;
   missaId: string;
   onMusicoEscalado: () => void;
+}
+
+interface EscalacaoDefault {
+  id: string;
+  musico_id: string;
+  musico_nome: string;
+  parte_missa: string;
+  funcao: string;
+  instrumento?: string;
 }
 
 const PARTES_MISSA = [
@@ -46,6 +56,7 @@ const FUNCOES = [
 export function EscalarMusicoModal({ isOpen, onClose, missaId, onMusicoEscalado }: EscalarMusicoModalProps) {
   const [musicos, setMusicos] = useState<Musico[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showEscalacaoDefault, setShowEscalacaoDefault] = useState(false);
   const [formData, setFormData] = useState({
     musico_id: '',
     parte_missa: '',
@@ -107,6 +118,30 @@ export function EscalarMusicoModal({ isOpen, onClose, missaId, onMusicoEscalado 
     }
   };
 
+  const handleAplicarEscalacaoDefault = async (escalacoes: EscalacaoDefault[]) => {
+    try {
+      setLoading(true);
+      for (const escalacao of escalacoes) {
+        await post('/missa-musicos', {
+          missa_id: missaId,
+          musico_id: escalacao.musico_id,
+          parte_missa: escalacao.parte_missa,
+          funcao: escalacao.funcao,
+          instrumento: escalacao.instrumento || '',
+          observacoes: ''
+        });
+      }
+      toast.success(`${escalacoes.length} músicos escalados com sucesso!`);
+      onMusicoEscalado();
+      onClose();
+    } catch (error) {
+      console.error('Erro ao aplicar escalação padrão:', error);
+      toast.error('Erro ao aplicar escalação padrão');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const selectedMusico = musicos.find(m => m.id === formData.musico_id);
 
   return (
@@ -121,6 +156,18 @@ export function EscalarMusicoModal({ isOpen, onClose, missaId, onMusicoEscalado 
             Selecione o músico, a parte da missa e a função que ele irá desempenhar
           </DialogDescription>
         </DialogHeader>
+
+        {/* Botões de ações rápidas */}
+        <div className="flex gap-2 pb-4 border-b">
+          <Button
+            variant="outline"
+            onClick={() => setShowEscalacaoDefault(true)}
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Usar Escalação Padrão
+          </Button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
@@ -243,6 +290,15 @@ export function EscalarMusicoModal({ isOpen, onClose, missaId, onMusicoEscalado 
             </Button>
           </div>
         </form>
+
+        {/* Modal de Escalação Padrão */}
+        {showEscalacaoDefault && (
+          <EscalacoesDefault
+            isOpen={showEscalacaoDefault}
+            onClose={() => setShowEscalacaoDefault(false)}
+            onAplicarDefault={handleAplicarEscalacaoDefault}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
