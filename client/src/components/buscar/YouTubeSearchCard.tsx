@@ -35,8 +35,16 @@ export function YouTubeSearchCard() {
     
     setIsSearching(true);
     try {
+      console.log('Searching for:', searchTerm);
       const results = await get(`/search/music?q=${encodeURIComponent(searchTerm)}`);
+      console.log('Search results:', results);
       setSearchResults(results);
+      
+      if (!results.youtube || results.youtube.length === 0) {
+        toast.info('Nenhuma música encontrada no YouTube');
+      } else {
+        toast.success(`${results.youtube.length} músicas encontradas!`);
+      }
     } catch (error) {
       console.error('Erro na busca:', error);
       toast.error('Erro ao buscar músicas');

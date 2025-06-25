@@ -31,7 +31,7 @@ interface YouTubeVideoDetails {
 }
 
 export class MusicSearchService {
-  private static readonly YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+  private static readonly YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || 'AIzaSyB4UJR8RSCxKjcMFwUD7vdTJRGd5ADVrQM';
   private static readonly CIFRAS_GOIANIA_BASE_URL = 'https://arquidiocesegoiania.org.br/cifras-e-partituras/';
   private static readonly CNV_MP3_BASE_URL = 'https://cnvmp3.com/v25/';
 

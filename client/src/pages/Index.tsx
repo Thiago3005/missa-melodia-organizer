@@ -342,15 +342,13 @@ const Index = () => {
                                 </p>
                               )}
 
-                              <div className="flex gap-2 pt-2">
+                              <div className="grid grid-cols-4 gap-2 pt-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setSelectedMissa(missa)}
-                                  className="flex-1"
                                 >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  Ver
+                                  <Eye className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   size="sm"
@@ -359,17 +357,14 @@ const Index = () => {
                                     setSelectedMissa(missa);
                                     setShowEscalarMusico(true);
                                   }}
-                                  className="flex-1"
                                 >
                                   Escalar
                                 </Button>
                                 <Button
                                   size="sm"
                                   onClick={() => setEditingMissa(missa)}
-                                  className="flex-1"
                                 >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  Editar
+                                  <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   size="sm"
