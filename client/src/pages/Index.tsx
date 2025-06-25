@@ -12,7 +12,8 @@ import { BuscarMusicas } from '../components/buscar/BuscarMusicas';
 import { YouTubeSearchCard } from '@/components/buscar/YouTubeSearchCard';
 import { BibliotecaMusicas } from '../components/musicas/BibliotecaMusicas';
 import { SugestoesManager } from '../components/sugestoes/SugestoesManager';
-import { RelatoriosManager } from '../components/relatorios/RelatoriosManager';
+import { AnalyticsDashboard } from '../components/relatorios/AnalyticsDashboard';
+import { EscalarMusicoModal } from '../components/missas/EscalarMusicoModal';
 import { HistoricoMissas } from '../components/historico/HistoricoMissas';
 import { DisponibilidadeManager } from '../components/disponibilidade/DisponibilidadeManager';
 import { PartituraSearch } from '../components/partituras/PartituraSearch';
@@ -36,6 +37,7 @@ const Index = () => {
   const [editingMusico, setEditingMusico] = useState<SupabaseMusico | null>(null);
   const [selectedMissa, setSelectedMissa] = useState<SupabaseMissa | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showEscalarMusico, setShowEscalarMusico] = useState(false);
   const [managingDisponibilidade, setManagingDisponibilidade] = useState<{musicoId: string, musicoNome: string} | null>(null);
 
   const {
@@ -221,7 +223,7 @@ const Index = () => {
 
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto p-6">
-          {activeTab === 'dashboard' && <Dashboard />}
+          {activeTab === 'dashboard' && <Dashboard onTabChange={setActiveTab} />}
 
           {activeTab === 'missas' && (
             <div className="space-y-6">
@@ -515,12 +517,27 @@ const Index = () => {
           )}
 
           {activeTab === 'sugestoes' && isAdmin && <SugestoesManager />}
-          {activeTab === 'relatorios' && isAdmin && <RelatoriosManager />}
+          {activeTab === 'relatorios' && isAdmin && <AnalyticsDashboard />}
           {activeTab === 'usuarios' && isAdmin && <UserManagement />}
         </main>
       </div>
 
       <Toaster />
+
+      {/* Escalar Músico Modal */}
+      {selectedMissa && (
+        <EscalarMusicoModal
+          isOpen={showEscalarMusico}
+          onClose={() => {
+            setShowEscalarMusico(false);
+            setSelectedMissa(null);
+          }}
+          missaId={selectedMissa.id}
+          onMusicoEscalado={() => {
+            // Refresh data if needed
+          }}
+        />
+      )}
     </div>
   );
 };

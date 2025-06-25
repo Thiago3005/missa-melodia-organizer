@@ -1,23 +1,24 @@
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Calendar, Users, Music, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Calendar, Music, Users, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
+import { useEffect, useState } from 'react';
 
 interface AnalyticsData {
   missasPorMes: Array<{ mes: string; quantidade: number }>;
   musicosMaisAtuantes: Array<{ nome: string; participacoes: number }>;
-  sugestoesPorStatus: Array<{ status: string; quantidade: number; cor: string }>;
-  musicasMaisUsadas: Array<{ nome: string; usos: number }>;
-  disponibilidadeCoral: Array<{ data: string; disponivel: number; total: number }>;
-  partesMissaCarentes: Array<{ parte: string; preenchimento: number }>;
+  sugestoesPorStatus: Array<{ status: string; count: number; color: string }>;
+  musicasMaisUsadas: Array<{ nome: string; usos: number; cantor?: string }>;
+  disponibilidadeCoral: Array<{ dia: string; disponivel: number; total: number }>;
+  partesCarentes: Array<{ parte: string; preenchimento: number; total: number }>;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export function AnalyticsDashboard() {
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const { get } = useApi();
 
@@ -29,53 +30,56 @@ export function AnalyticsDashboard() {
     try {
       setLoading(true);
       const data = await get('/analytics');
-      setAnalytics(data);
+      setAnalyticsData(data);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
-      // Dados mock para demonstração
-      setAnalytics({
+      console.error('Erro ao carregar analytics:', error);
+      // Dados de exemplo para demonstração
+      setAnalyticsData({
         missasPorMes: [
-          { mes: 'Jan', quantidade: 15 },
-          { mes: 'Fev', quantidade: 12 },
-          { mes: 'Mar', quantidade: 18 },
-          { mes: 'Abr', quantidade: 16 },
-          { mes: 'Mai', quantidade: 20 },
-          { mes: 'Jun', quantidade: 14 }
+          { mes: 'Jul', quantidade: 8 },
+          { mes: 'Ago', quantidade: 12 },
+          { mes: 'Set', quantidade: 10 },
+          { mes: 'Out', quantidade: 15 },
+          { mes: 'Nov', quantidade: 14 },
+          { mes: 'Dez', quantidade: 18 }
         ],
         musicosMaisAtuantes: [
-          { nome: 'João Silva', participacoes: 45 },
-          { nome: 'Maria Santos', participacoes: 38 },
-          { nome: 'Pedro Costa', participacoes: 32 },
-          { nome: 'Ana Lima', participacoes: 28 },
-          { nome: 'Carlos Rocha', participacoes: 24 }
+          { nome: 'Maria Silva', participacoes: 24 },
+          { nome: 'João Santos', participacoes: 20 },
+          { nome: 'Ana Costa', participacoes: 18 },
+          { nome: 'Pedro Lima', participacoes: 15 },
+          { nome: 'Carlos Oliveira', participacoes: 12 }
         ],
         sugestoesPorStatus: [
-          { status: 'Pendente', quantidade: 8, cor: '#FFBB28' },
-          { status: 'Aprovada', quantidade: 12, cor: '#00C49F' },
-          { status: 'Recusada', quantidade: 3, cor: '#FF8042' }
+          { status: 'Pendente', count: 5, color: '#FFBB28' },
+          { status: 'Aprovada', count: 12, color: '#00C49F' },
+          { status: 'Recusada', count: 3, color: '#FF8042' }
         ],
         musicasMaisUsadas: [
-          { nome: 'Ave Maria', usos: 25 },
-          { nome: 'Kyrie Eleison', usos: 22 },
-          { nome: 'Gloria in Excelsis', usos: 18 },
-          { nome: 'Sanctus', usos: 16 },
-          { nome: 'Agnus Dei', usos: 14 }
+          { nome: 'Ave Maria', usos: 15, cantor: 'Schubert' },
+          { nome: 'Pange Lingua', usos: 12, cantor: 'Tradicional' },
+          { nome: 'Veni Creator', usos: 10, cantor: 'Gregoriano' },
+          { nome: 'Te Deum', usos: 8, cantor: 'Tradicional' },
+          { nome: 'Magnificat', usos: 7, cantor: 'Bach' }
         ],
         disponibilidadeCoral: [
-          { data: '2024-01', disponivel: 15, total: 18 },
-          { data: '2024-02', disponivel: 16, total: 18 },
-          { data: '2024-03', disponivel: 12, total: 18 },
-          { data: '2024-04', disponivel: 17, total: 18 },
-          { data: '2024-05', disponivel: 14, total: 18 },
-          { data: '2024-06', disponivel: 18, total: 18 }
+          { dia: 'Dom', disponivel: 8, total: 10 },
+          { dia: 'Seg', disponivel: 3, total: 10 },
+          { dia: 'Ter', disponivel: 4, total: 10 },
+          { dia: 'Qua', disponivel: 6, total: 10 },
+          { dia: 'Qui', disponivel: 5, total: 10 },
+          { dia: 'Sex', disponivel: 4, total: 10 },
+          { dia: 'Sáb', disponivel: 7, total: 10 }
         ],
-        partesMissaCarentes: [
-          { parte: 'Entrada', preenchimento: 85 },
-          { parte: 'Ofertório', preenchimento: 70 },
-          { parte: 'Comunhão', preenchimento: 90 },
-          { parte: 'Saída', preenchimento: 60 },
-          { parte: 'Kyrie', preenchimento: 95 },
-          { parte: 'Gloria', preenchimento: 80 }
+        partesCarentes: [
+          { parte: 'Entrada', preenchimento: 85, total: 100 },
+          { parte: 'Kyrie', preenchimento: 60, total: 100 },
+          { parte: 'Gloria', preenchimento: 75, total: 100 },
+          { parte: 'Aclamação', preenchimento: 45, total: 100 },
+          { parte: 'Ofertório', preenchimento: 90, total: 100 },
+          { parte: 'Sanctus', preenchimento: 55, total: 100 },
+          { parte: 'Comunhão', preenchimento: 80, total: 100 },
+          { parte: 'Saída', preenchimento: 70, total: 100 }
         ]
       });
     } finally {
@@ -85,62 +89,59 @@ export function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="space-y-6">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Carregando análises...</p>
+          <h1 className="text-3xl font-bold mb-2">Relatórios e Analytics</h1>
+          <p className="text-muted-foreground">Carregando dados...</p>
         </div>
       </div>
     );
   }
 
-  if (!analytics) {
+  if (!analyticsData) {
     return (
-      <div className="text-center py-8">
-        <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Erro ao carregar análises
-        </h3>
-        <p className="text-gray-600">
-          Não foi possível carregar os dados analíticos
-        </p>
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">Relatórios e Analytics</h1>
+          <p className="text-muted-foreground">Erro ao carregar dados</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard Analítico</h1>
-        <Badge variant="outline" className="flex items-center gap-1">
-          <TrendingUp className="h-3 w-3" />
-          Últimos 6 meses
-        </Badge>
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-2">Relatórios e Analytics</h1>
+        <p className="text-muted-foreground">
+          Análises detalhadas do sistema musical
+        </p>
       </div>
 
-      {/* Missas por Mês */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Missas por Mês
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analytics.missasPorMes}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="quantidade" fill="#3B82F6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Grid de gráficos */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Missas por mês */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Missas por Mês
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analyticsData.missasPorMes}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="quantidade" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Músicos Mais Atuantes */}
+        {/* Músicos mais atuantes */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -150,22 +151,22 @@ export function AnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.musicosMaisAtuantes} layout="horizontal">
+              <BarChart data={analyticsData.musicosMaisAtuantes} layout="horizontal">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="nome" type="category" width={80} />
                 <Tooltip />
-                <Bar dataKey="participacoes" fill="#10B981" />
+                <Bar dataKey="participacoes" fill="#82ca9d" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Sugestões por Status */}
+        {/* Sugestões por status */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
+              <TrendingUp className="h-5 w-5" />
               Sugestões por Status
             </CardTitle>
           </CardHeader>
@@ -173,17 +174,17 @@ export function AnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={analytics.sugestoesPorStatus}
+                  data={analyticsData.sugestoesPorStatus}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ status, quantidade }) => `${status}: ${quantidade}`}
+                  label={({ status, count }) => `${status}: ${count}`}
                   outerRadius={80}
                   fill="#8884d8"
-                  dataKey="quantidade"
+                  dataKey="count"
                 >
-                  {analytics.sugestoesPorStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.cor} />
+                  {analyticsData.sugestoesPorStatus.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -191,94 +192,80 @@ export function AnalyticsDashboard() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {/* Disponibilidade do coral */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Disponibilidade do Coral
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={analyticsData.disponibilidadeCoral}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="dia" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="disponivel" stroke="#8884d8" strokeWidth={2} />
+                <Line type="monotone" dataKey="total" stroke="#82ca9d" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Músicas Mais Usadas */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Music className="h-5 w-5" />
-            Músicas Mais Usadas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analytics.musicasMaisUsadas}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="nome" angle={-45} textAnchor="end" height={80} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="usos" fill="#8B5CF6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Disponibilidade do Coral */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Disponibilidade do Coral
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={analytics.disponibilidadeCoral}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="data" />
-              <YAxis />
-              <Tooltip />
-              <Line 
-                type="monotone" 
-                dataKey="disponivel" 
-                stroke="#10B981" 
-                strokeWidth={2}
-                name="Disponíveis"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="total" 
-                stroke="#6B7280" 
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                name="Total"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Partes da Missa Mais Carentes */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Partes da Missa - Preenchimento
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {analytics.partesMissaCarentes.map((parte) => (
-              <div key={parte.parte} className="flex items-center justify-between">
-                <span className="font-medium">{parte.parte}</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        parte.preenchimento >= 80 ? 'bg-green-500' : 
-                        parte.preenchimento >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${parte.preenchimento}%` }}
-                    ></div>
+      {/* Músicas mais usadas e partes carentes */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Músicas mais usadas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Music className="h-5 w-5" />
+              Músicas Mais Usadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analyticsData.musicasMaisUsadas.map((musica, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div>
+                    <p className="font-medium">{musica.nome}</p>
+                    {musica.cantor && (
+                      <p className="text-sm text-muted-foreground">{musica.cantor}</p>
+                    )}
                   </div>
-                  <span className="text-sm font-medium">{parte.preenchimento}%</span>
+                  <Badge variant="secondary">{musica.usos} usos</Badge>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Partes da missa mais carentes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Partes Mais Carentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {analyticsData.partesCarentes.map((parte, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{parte.parte}</span>
+                    <span className="text-sm text-muted-foreground">{parte.preenchimento}%</span>
+                  </div>
+                  <Progress value={parte.preenchimento} className="h-2" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

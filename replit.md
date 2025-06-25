@@ -20,8 +20,8 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
 - **State Management**: React hooks + API integration
 - **UI Components**: Shadcn/ui components
 
-## Recent Changes
-- **2025-01-25**: Complete availability control and analytics implementation
+## Recent Changes  
+- **2025-01-25**: Interface improvements and theme implementation
   - Added complete musician availability control with absence tracking
   - Implemented separated YouTube search from intelligent sheet music search
   - Fixed Dashboard "Ver" button navigation to missas tab
@@ -32,6 +32,14 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
   - Added Disponibilidade tab to navigation
   - Created analytics endpoint with mock data
   - Updated documentation with SQL schemas and new features
+- **2025-01-25**: Light theme implementation and UX improvements
+  - Fixed date formatting issues in missa cards
+  - Implemented theme selector (light/dark) with light as default
+  - Added musician assignment functionality for mass scheduling
+  - Created comprehensive analytics dashboard with 6 charts
+  - Improved dashboard navigation and "Nova missa" button functionality
+  - Enhanced card styling with rounded corners and subtle shadows
+  - Optimized interface contrast for better readability
 - **2025-01-25**: Complete system functionality implementation
   - Fixed UserManagement component import and authentication issues
   - Added comprehensive music library selector for missas

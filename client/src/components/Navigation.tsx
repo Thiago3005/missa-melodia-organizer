@@ -9,9 +9,15 @@ import {
   MessageSquare, 
   FileText,
   Menu,
-  X
+  X,
+  Sun,
+  Moon,
+  LogOut,
+  User
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
+import { useAuth } from '../components/auth/AuthProvider';
 
 interface NavigationProps {
   activeTab: string;
@@ -21,6 +27,8 @@ interface NavigationProps {
 
 export function Navigation({ activeTab, onTabChange, userType = 'admin' }: NavigationProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   // Tabs baseadas no tipo de usuário
   const adminTabs = [
@@ -93,14 +101,54 @@ export function Navigation({ activeTab, onTabChange, userType = 'admin' }: Navig
         })}
       </nav>
 
-      {/* Footer */}
-      {!collapsed && (
-        <div className="p-4 border-t border-slate-700">
+      {/* Footer com controles de usuário e tema */}
+      <div className="mt-auto p-4 border-t border-slate-700 space-y-3">
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg transition-colors"
+        >
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          {!collapsed && <span className="text-sm">Alternar Tema</span>}
+        </Button>
+        
+        {/* User info */}
+        {!collapsed && user && (
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4 text-slate-300" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {user.nome}
+              </p>
+              <p className="text-xs text-slate-400 truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Logout */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-slate-800 rounded-lg transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+          {!collapsed && <span className="text-sm">Sair</span>}
+        </Button>
+        
+        {!collapsed && (
           <p className="text-xs text-slate-400 text-center">
             Sistema de Gestão Musical
           </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -12,10 +12,14 @@ interface MissaCardProps {
   onEdit: (missa: Missa) => void;
   onDelete: (id: string) => void;
   onView?: (missa: Missa) => void;
+  onEscalarMusico?: () => void;
 }
 
-export function MissaCard({ missa, onEdit, onDelete, onView }: MissaCardProps) {
-  const dataFormatada = format(new Date(missa.data), 'dd/MM/yyyy', { locale: ptBR });
+export function MissaCard({ missa, onEdit, onDelete, onView, onEscalarMusico }: MissaCardProps) {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
   const totalMusicas = missa.musicas.length;
 
   return (
@@ -30,9 +34,9 @@ export function MissaCard({ missa, onEdit, onDelete, onView }: MissaCardProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          <div className="flex items-center text-sm text-gray-600">
+          <div className="flex items-center text-sm text-muted-foreground">
             <Calendar className="h-4 w-4 mr-2" />
-            <span>{dataFormatada}</span>
+            <span>{formatDate(missa.data)}</span>
           </div>
           
           <div className="flex items-center text-sm text-gray-600">
@@ -59,6 +63,11 @@ export function MissaCard({ missa, onEdit, onDelete, onView }: MissaCardProps) {
               <Button onClick={() => onView(missa)} size="sm" variant="outline" className="flex-1">
                 <Eye className="h-4 w-4 mr-2" />
                 Ver
+              </Button>
+            )}
+            {onEscalarMusico && (
+              <Button onClick={onEscalarMusico} size="sm" variant="secondary" className="flex-1">
+                Escalar
               </Button>
             )}
             <Button onClick={() => onEdit(missa)} size="sm" className="flex-1">

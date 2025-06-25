@@ -1,10 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar, Users, UserCheck, MessageSquare, Plus, Search } from 'lucide-react';
+import { Calendar, Users, UserCheck, MessageSquare, Plus, Search, BarChart3, TrendingUp } from 'lucide-react';
 import { useSupabaseMissas, useSupabaseMusicos } from '../hooks/useApi';
+import { AnalyticsDashboard } from './relatorios/AnalyticsDashboard';
 
-export function Dashboard() {
+interface DashboardProps {
+  onTabChange: (tab: string) => void;
+}
+
+export function Dashboard({ onTabChange }: DashboardProps) {
   const { missas } = useSupabaseMissas();
   const { musicos, sugestoes } = useSupabaseMusicos();
 
@@ -95,7 +100,10 @@ export function Dashboard() {
                 />
               </div>
             </div>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button 
+              onClick={() => onTabChange('missas')}
+              className="bg-slate-900 hover:bg-slate-800 text-white"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nova Missa
             </Button>
@@ -124,7 +132,7 @@ export function Dashboard() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => window.location.hash = '#missas'}
+                      onClick={() => onTabChange('missas')}
                     >
                       Ver
                     </Button>

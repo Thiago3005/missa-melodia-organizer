@@ -53,7 +53,12 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
 
   const handleRemoverEscalacao = async (escalacaoId: string) => {
     try {
-      await get(`/missa-musicos/${escalacaoId}`, { method: 'DELETE' });
+      await fetch(`/api/missa-musicos/${escalacaoId}`, { 
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
       toast.success('Músico removido da escala!');
       fetchMusicosEscalados();
     } catch (error) {
@@ -104,7 +109,7 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
             ← Voltar
           </Button>
           <h2 className="text-2xl font-bold">{missa.tipo}</h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             {new Date(missa.data).toLocaleDateString('pt-BR')} - {missa.horario}
           </p>
         </div>
