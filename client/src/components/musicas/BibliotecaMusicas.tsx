@@ -6,59 +6,18 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Music, Search, Play, Download, Trash2, ExternalLink } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useBibliotecaMusicas, BibliotecaMusica } from '../../hooks/useApi';
 import { toast } from '@/hooks/use-toast';
 import { SECOES_LITURGICAS, SecaoLiturgica } from '../../types';
 
-interface BibliotecaMusica {
-  id: string;
-  nome: string;
-  cantor?: string;
-  link_youtube?: string;
-  secao_liturgica?: string;
-  youtube_video_id?: string;
-  thumbnail?: string;
-  duracao?: string;
-  created_at: string;
-}
-
 export function BibliotecaMusicas() {
-  const [musicas, setMusicas] = useState<BibliotecaMusica[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [secaoFiltro, setSecaoFiltro] = useState<SecaoLiturgica | 'todas'>('todas');
+  const { musicas, loading, removerMusica } = useBibliotecaMusicas();
 
-  const fetchMusicas = async () => {
+  const handleRemoverMusica = async (id: string) => {
     try {
-      const { data, error } = await supabase
-        .from('biblioteca_musicas')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setMusicas(data || []);
-    } catch (error) {
-      console.error('Erro ao buscar biblioteca:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao carregar biblioteca de músicas',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removerMusica = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('biblioteca_musicas')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setMusicas(prev => prev.filter(m => m.id !== id));
+      await removerMusica(id);
       toast({
         title: 'Sucesso',
         description: 'Música removida da biblioteca!'
@@ -67,7 +26,7 @@ export function BibliotecaMusicas() {
       console.error('Erro ao remover música:', error);
       toast({
         title: 'Erro',
-        description: 'Falha ao remover música',
+        description: 'Falha ao remover música da biblioteca',
         variant: 'destructive'
       });
     }
@@ -93,9 +52,7 @@ export function BibliotecaMusicas() {
     return matchesSearch && matchesSecao;
   });
 
-  useEffect(() => {
-    fetchMusicas();
-  }, []);
+
 
   if (loading) {
     return (
@@ -219,7 +176,7 @@ export function BibliotecaMusicas() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => removerMusica(musica.id)}
+                        onClick={() => handleRemoverMusica(musica.id)}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>

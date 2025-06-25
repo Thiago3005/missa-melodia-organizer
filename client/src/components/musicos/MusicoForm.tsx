@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SupabaseMusico } from '../../hooks/useSupabaseMusicos';
+import { SupabaseMusico } from '../../hooks/useApi';
 
 interface MusicoFormProps {
   musico?: any; // Mantendo compatibilidade com formato antigo

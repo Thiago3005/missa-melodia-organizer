@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Play, Download, Save, ExternalLink } from 'lucide-react';
 import { useYouTubeAPI, YouTubeVideo } from '../../hooks/useYouTubeAPI';
-import { supabase } from '@/integrations/supabase/client';
+import { useBibliotecaMusicas } from '../../hooks/useApi';
 import { toast } from '@/hooks/use-toast';
 import { SECOES_LITURGICAS, SecaoLiturgica } from '../../types';
 
@@ -16,6 +16,7 @@ export function BuscarMusicas() {
   const [searchTerm, setSearchTerm] = useState('');
   const [secaoFiltro, setSecaoFiltro] = useState<SecaoLiturgica | 'todas'>('todas');
   const { videos, loading, searchVideos } = useYouTubeAPI();
+  const { adicionarMusica } = useBibliotecaMusicas();
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -42,19 +43,15 @@ export function BuscarMusicas() {
 
   const salvarNaBiblioteca = async (video: YouTubeVideo, secao?: SecaoLiturgica) => {
     try {
-      const { error } = await supabase
-        .from('biblioteca_musicas')
-        .insert([{
-          nome: video.title,
-          cantor: video.channelTitle,
-          link_youtube: `https://www.youtube.com/watch?v=${video.id}`,
-          secao_liturgica: secao || null,
-          youtube_video_id: video.id,
-          thumbnail: video.thumbnail,
-          duracao: video.duration
-        }]);
-
-      if (error) throw error;
+      await adicionarMusica({
+        nome: video.title,
+        cantor: video.channelTitle,
+        link_youtube: `https://www.youtube.com/watch?v=${video.id}`,
+        secao_liturgica: secao || undefined,
+        youtube_video_id: video.id,
+        thumbnail: video.thumbnail,
+        duracao: video.duration
+      });
 
       toast({
         title: 'Sucesso',
