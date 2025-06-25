@@ -15,6 +15,7 @@ import { RelatoriosManager } from '../components/relatorios/RelatoriosManager';
 import { HistoricoMissas } from '../components/historico/HistoricoMissas';
 import { DisponibilidadeManager } from '../components/disponibilidade/DisponibilidadeManager';
 import { PartituraSearch } from '../components/partituras/PartituraSearch';
+import { UserManagement } from '../components/admin/UserManagement';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

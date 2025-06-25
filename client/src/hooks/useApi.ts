@@ -55,9 +55,12 @@ export interface BibliotecaMusica {
 }
 
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
+  const token = localStorage.getItem('authToken');
+  
   const response = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,

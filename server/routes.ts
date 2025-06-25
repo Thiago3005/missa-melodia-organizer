@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Music search routes
-  app.get("/api/search/music", async (req, res) => {
+  app.get("/api/search/music", authenticateToken, async (req, res) => {
     try {
       const query = req.query.q as string;
       if (!query) {
@@ -210,7 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/search/youtube-to-mp3", async (req, res) => {
+  app.post("/api/search/youtube-to-mp3", authenticateToken, async (req, res) => {
     try {
       const { youtubeUrl } = req.body;
       if (!youtubeUrl) {

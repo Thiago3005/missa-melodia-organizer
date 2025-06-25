@@ -5,8 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Download, FileText, Music, Youtube, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Download, FileText, Music, Youtube, Trash2, Library } from 'lucide-react';
 import { Missa, Musica, SECOES_LITURGICAS, SecaoLiturgica } from '../../types';
+import { MusicaSelector } from './MusicaSelector';
+import { BibliotecaMusica } from '@/hooks/useApi';
+import { toast } from 'sonner';
 
 interface MissaDetalhesProps {
   missa: Missa;
@@ -26,6 +30,8 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
     secaoLiturgica: 'entrada' as SecaoLiturgica
   });
   const [secaoAtiva, setSecaoAtiva] = useState<SecaoLiturgica>('entrada');
+  const [showMusicaSelector, setShowMusicaSelector] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
 
   const getMusicasPorSecao = (secao: SecaoLiturgica) => {
     return missa.musicas.filter(musica => musica.secaoLiturgica === secao);
@@ -43,7 +49,21 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
         observacoes: '',
         secaoLiturgica: secaoAtiva
       });
+      setShowManualForm(false);
     }
+  };
+
+  const handleSelectFromBiblioteca = (musica: BibliotecaMusica, secaoLiturgica: SecaoLiturgica) => {
+    const musicaData = {
+      nome: musica.nome,
+      cantor: musica.cantor || '',
+      linkYoutube: musica.link_youtube || '',
+      partitura: musica.partitura || '',
+      linkDownload: musica.link_download || '',
+      observacoes: musica.observacoes || '',
+      secaoLiturgica
+    };
+    onAddMusica(missa.id, musicaData);
   };
 
   return (
@@ -104,51 +124,82 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Formulário para adicionar música */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-            <div>
-              <Input
-                placeholder="Nome da música"
-                value={novaMusica.nome}
-                onChange={(e) => setNovaMusica({ ...novaMusica, nome: e.target.value })}
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Cantor/Intérprete"
-                value={novaMusica.cantor}
-                onChange={(e) => setNovaMusica({ ...novaMusica, cantor: e.target.value })}
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Link do YouTube"
-                value={novaMusica.linkYoutube}
-                onChange={(e) => setNovaMusica({ ...novaMusica, linkYoutube: e.target.value })}
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Link da Partitura"
-                value={novaMusica.partitura}
-                onChange={(e) => setNovaMusica({ ...novaMusica, partitura: e.target.value })}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Textarea
-                placeholder="Observações"
-                value={novaMusica.observacoes}
-                onChange={(e) => setNovaMusica({ ...novaMusica, observacoes: e.target.value })}
-                rows={2}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Button onClick={handleAddMusica} className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Música
-              </Button>
-            </div>
+          {/* Botões para adicionar música */}
+          <div className="flex gap-3 mb-6">
+            <Button 
+              onClick={() => setShowMusicaSelector(true)}
+              className="flex-1"
+              variant="default"
+            >
+              <Library className="h-4 w-4 mr-2" />
+              Adicionar da Biblioteca
+            </Button>
+            <Button 
+              onClick={() => setShowManualForm(!showManualForm)}
+              variant="outline"
+              className="flex-1"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {showManualForm ? 'Fechar Formulário' : 'Adicionar Manualmente'}
+            </Button>
           </div>
+
+          {/* Formulário manual (quando aberto) */}
+          {showManualForm && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+              <div>
+                <Input
+                  placeholder="Nome da música"
+                  value={novaMusica.nome}
+                  onChange={(e) => setNovaMusica({ ...novaMusica, nome: e.target.value })}
+                />
+              </div>
+              <div>
+                <Input
+                  placeholder="Cantor/Intérprete"
+                  value={novaMusica.cantor}
+                  onChange={(e) => setNovaMusica({ ...novaMusica, cantor: e.target.value })}
+                />
+              </div>
+              <div>
+                <Input
+                  placeholder="Link do YouTube"
+                  value={novaMusica.linkYoutube}
+                  onChange={(e) => setNovaMusica({ ...novaMusica, linkYoutube: e.target.value })}
+                />
+              </div>
+              <div>
+                <Input
+                  placeholder="Link de Download"
+                  value={novaMusica.linkDownload}
+                  onChange={(e) => setNovaMusica({ ...novaMusica, linkDownload: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Textarea
+                  placeholder="Partitura (texto)"
+                  value={novaMusica.partitura}
+                  onChange={(e) => setNovaMusica({ ...novaMusica, partitura: e.target.value })}
+                  rows={3}
+                  className="font-mono"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Textarea
+                  placeholder="Observações"
+                  value={novaMusica.observacoes}
+                  onChange={(e) => setNovaMusica({ ...novaMusica, observacoes: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Button onClick={handleAddMusica} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Música
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Lista de músicas da seção */}
           <div className="space-y-3">
@@ -163,6 +214,19 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
                     {musica.observacoes && (
                       <p className="text-sm text-gray-500 italic mt-1">{musica.observacoes}</p>
                     )}
+                    
+                    {/* Mostrar partitura em texto se disponível */}
+                    {musica.partitura && musica.partitura.length > 10 && !musica.partitura.startsWith('http') && (
+                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                        <div className="flex items-center gap-1 mb-1">
+                          <FileText className="h-3 w-3" />
+                          <span className="font-medium">Partitura:</span>
+                        </div>
+                        <div className="font-mono text-gray-700 max-h-20 overflow-y-auto whitespace-pre-wrap">
+                          {musica.partitura}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2 ml-4">
                     {musica.linkYoutube && (
@@ -172,7 +236,7 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
                         </a>
                       </Button>
                     )}
-                    {musica.partitura && (
+                    {musica.partitura && musica.partitura.startsWith('http') && (
                       <Button size="sm" variant="outline" asChild>
                         <a href={musica.partitura} target="_blank" rel="noopener noreferrer">
                           <FileText className="h-4 w-4" />
@@ -203,6 +267,14 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
           </div>
         </CardContent>
       </Card>
+
+      {/* Music Selector Dialog */}
+      <MusicaSelector
+        isOpen={showMusicaSelector}
+        onClose={() => setShowMusicaSelector(false)}
+        onSelectMusica={handleSelectFromBiblioteca}
+        secaoInicial={secaoAtiva}
+      />
     </div>
   );
 }

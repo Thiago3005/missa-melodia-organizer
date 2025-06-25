@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Search, Music, Youtube, Download, ExternalLink, Plus } from 'lucide-react';
+import { Search, Music, Youtube, Download, ExternalLink, Plus, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApi } from '@/hooks/useApi';
 import { toast } from 'sonner';
+import { PartituraManager } from './PartituraManager';
 
 interface YouTubeResult {
   id: string;
@@ -34,6 +35,8 @@ export function BuscarMusicas() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<YouTubeResult | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showPartituraManager, setShowPartituraManager] = useState(false);
+  const [partituraVideo, setPartituraVideo] = useState<YouTubeResult | null>(null);
   const { get, post } = useApi();
 
   const [formData, setFormData] = useState({
@@ -68,7 +71,7 @@ export function BuscarMusicas() {
     
     setIsSearching(true);
     try {
-      const results = await get(`/api/search/music?q=${encodeURIComponent(searchTerm)}`);
+      const results = await get(`/search/music?q=${encodeURIComponent(searchTerm)}`);
       setSearchResults(results);
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -97,7 +100,7 @@ export function BuscarMusicas() {
 
   const handleSaveToLibrary = async () => {
     try {
-      await post('/api/biblioteca-musicas', formData);
+      await post('/biblioteca-musicas', formData);
       toast.success('Música adicionada à biblioteca com sucesso!');
       setIsDialogOpen(false);
       setFormData({
@@ -121,11 +124,33 @@ export function BuscarMusicas() {
 
   const handleGenerateMP3Link = async (youtubeUrl: string) => {
     try {
-      const response = await post('/api/search/youtube-to-mp3', { youtubeUrl });
+      const response = await post('/search/youtube-to-mp3', { youtubeUrl });
       window.open(response.mp3Link, '_blank');
     } catch (error) {
       console.error('Erro ao gerar link MP3:', error);
       toast.error('Erro ao gerar link de download');
+    }
+  };
+
+  const handleProcurarPartitura = (video: YouTubeResult) => {
+    setPartituraVideo(video);
+    setShowPartituraManager(true);
+  };
+
+  const handleSalvarPartitura = (partitura: string) => {
+    if (partituraVideo) {
+      setFormData({
+        ...formData,
+        partitura_texto: partitura,
+        nome: partituraVideo.title,
+        cantor: partituraVideo.channelTitle,
+        link_youtube: partituraVideo.url,
+        youtube_video_id: partituraVideo.id,
+        thumbnail: partituraVideo.thumbnail,
+        duracao: partituraVideo.duration
+      });
+      setSelectedMusic(partituraVideo);
+      setIsDialogOpen(true);
     }
   };
 
@@ -226,12 +251,11 @@ export function BuscarMusicas() {
                     <p className="text-xs text-gray-600 mb-3">
                       {result.channelTitle}
                     </p>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => window.open(result.url, '_blank')}
-                        className="flex-1"
                       >
                         <Youtube className="h-4 w-4 mr-1" />
                         Ver
@@ -239,21 +263,27 @@ export function BuscarMusicas() {
                       <Button
                         size="sm"
                         onClick={() => handleSelectMusic(result)}
-                        className="flex-1"
                       >
                         <Plus className="h-4 w-4 mr-1" />
                         Adicionar
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleGenerateMP3Link(result.url)}
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        MP3
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleProcurarPartitura(result)}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Partitura
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="w-full mt-2"
-                      onClick={() => handleGenerateMP3Link(result.url)}
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      Baixar MP3
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -381,6 +411,18 @@ export function BuscarMusicas() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Partitura Manager */}
+      <PartituraManager
+        youtubeVideo={partituraVideo ? {
+          id: partituraVideo.id,
+          title: partituraVideo.title,
+          channelTitle: partituraVideo.channelTitle
+        } : undefined}
+        isOpen={showPartituraManager}
+        onClose={() => setShowPartituraManager(false)}
+        onSave={handleSalvarPartitura}
+      />
     </div>
   );
 }
