@@ -385,6 +385,11 @@ npm run type-check      # Verifica tipos TypeScript
 - ✅ Gráficos de disponibilidade do coral
 - ✅ Monitoramento de partes da missa carentes
 - ✅ Sistema de escala de músicos por missa
+- ✅ Interface com tema escuro otimizado
+- ✅ Sistema de escalação de músicos com funções específicas (vocal, back vocal, instrumental, solista)
+- ✅ Seleção de partes da missa para cada músico (entrada, kyrie, gloria, aclamação, ofertório, sanctus, comunhão, saída)
+- ✅ Integração YouTube com busca separada de partituras
+- ✅ Interface aprimorada com tabs para diferentes tipos de busca
 
 ### Sistema de Disponibilidade
 **Como funciona:**

@@ -1,15 +1,17 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Download, FileText, Music, Youtube, Trash2, Library } from 'lucide-react';
+import { Plus, Download, FileText, Music, Youtube, Trash2, Library, Users, UserPlus } from 'lucide-react';
 import { Missa, Musica, SECOES_LITURGICAS, SecaoLiturgica } from '../../types';
 import { MusicaSelector } from './MusicaSelector';
+import { EscalarMusicoModal } from './EscalarMusicoModal';
 import { BibliotecaMusica } from '@/hooks/useApi';
+import { useApi } from '@/hooks/useApi';
 import { toast } from 'sonner';
 
 interface MissaDetalhesProps {
@@ -32,6 +34,33 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
   const [secaoAtiva, setSecaoAtiva] = useState<SecaoLiturgica>('entrada');
   const [showMusicaSelector, setShowMusicaSelector] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
+  const [showEscalarMusico, setShowEscalarMusico] = useState(false);
+  const [musicosEscalados, setMusicosEscalados] = useState<any[]>([]);
+  const { get } = useApi();
+
+  useEffect(() => {
+    fetchMusicosEscalados();
+  }, [missa.id]);
+
+  const fetchMusicosEscalados = async () => {
+    try {
+      const escalados = await get(`/missa-musicos/${missa.id}`);
+      setMusicosEscalados(escalados);
+    } catch (error) {
+      console.error('Erro ao carregar músicos escalados:', error);
+    }
+  };
+
+  const handleRemoverEscalacao = async (escalacaoId: string) => {
+    try {
+      await get(`/missa-musicos/${escalacaoId}`, { method: 'DELETE' });
+      toast.success('Músico removido da escala!');
+      fetchMusicosEscalados();
+    } catch (error) {
+      console.error('Erro ao remover escalação:', error);
+      toast.error('Erro ao remover músico da escala');
+    }
+  };
 
   const getMusicasPorSecao = (secao: SecaoLiturgica) => {
     return missa.musicas.filter(musica => musica.secaoLiturgica === secao);
@@ -268,12 +297,59 @@ export function MissaDetalhes({ missa, onAddMusica, onRemoveMusica, onBack }: Mi
         </CardContent>
       </Card>
 
+      {/* Músicos Escalados */}
+      {musicosEscalados.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Músicos Escalados
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3">
+              {musicosEscalados.map((escalacao) => (
+                <div key={escalacao.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="font-medium">{escalacao.musico?.nome}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Badge variant="secondary">{escalacao.parte_missa}</Badge>
+                        <Badge variant="outline">{escalacao.funcao}</Badge>
+                        {escalacao.instrumento && (
+                          <Badge variant="outline">{escalacao.instrumento}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleRemoverEscalacao(escalacao.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Music Selector Dialog */}
       <MusicaSelector
         isOpen={showMusicaSelector}
         onClose={() => setShowMusicaSelector(false)}
         onSelectMusica={handleSelectFromBiblioteca}
         secaoInicial={secaoAtiva}
+      />
+
+      {/* Escalar Músico Modal */}
+      <EscalarMusicoModal
+        isOpen={showEscalarMusico}
+        onClose={() => setShowEscalarMusico(false)}
+        missaId={missa.id}
+        onMusicoEscalado={fetchMusicosEscalados}
       />
     </div>
   );

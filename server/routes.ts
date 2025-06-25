@@ -46,6 +46,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Missa Musicos routes (escalação de músicos)
+  app.get("/api/missa-musicos/:missaId", authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      const musicosEscalados = await storage.getMissaMusicos(req.params.missaId);
+      res.json(musicosEscalados);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch missa musicos" });
+    }
+  });
+
+  app.post("/api/missa-musicos", authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      const escalacao = await storage.createMissaMusico(req.body);
+      res.json(escalacao);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create missa musico" });
+    }
+  });
+
+  app.delete("/api/missa-musicos/:id", authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      await storage.deleteMissaMusico(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete missa musico" });
+    }
+  });
+
   // Missas routes
   app.get("/api/missas", async (req, res) => {
     try {

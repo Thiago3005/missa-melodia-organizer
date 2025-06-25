@@ -98,6 +98,10 @@ export const missaMusicos = pgTable("missa_musicos", {
   id: uuid("id").defaultRandom().primaryKey(),
   missa_id: uuid("missa_id").references(() => missas.id, { onDelete: "cascade" }).notNull(),
   musico_id: uuid("musico_id").references(() => musicos.id, { onDelete: "cascade" }).notNull(),
+  parte_missa: text("parte_missa").notNull(), // entrada, kyrie, gloria, aclamacao, ofertorio, sanctus, comunhao, saida
+  funcao: text("funcao").notNull().default("vocal"), // vocal, backvocal, instrumental, solista
+  instrumento: text("instrumento"), // violao, piano, flauta, etc
+  observacoes: text("observacoes"),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

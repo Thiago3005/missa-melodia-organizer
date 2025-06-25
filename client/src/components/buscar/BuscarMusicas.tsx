@@ -37,6 +37,7 @@ export function BuscarMusicas() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showPartituraManager, setShowPartituraManager] = useState(false);
   const [partituraVideo, setPartituraVideo] = useState<YouTubeResult | null>(null);
+  const [activeTab, setActiveTab] = useState<'youtube' | 'partituras'>('youtube');
   const { get, post } = useApi();
 
   const [formData, setFormData] = useState({
@@ -157,10 +158,36 @@ export function BuscarMusicas() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Buscar Músicas</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold mb-2">Buscar Músicas</h1>
+        <p className="text-muted-foreground">
           Sistema inteligente de busca de partituras e recursos litúrgicos
         </p>
+      </div>
+
+      {/* Tabs para diferentes tipos de busca */}
+      <div className="flex space-x-1 rounded-lg bg-muted p-1">
+        <button
+          className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'youtube'
+              ? 'bg-background shadow-sm text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+          onClick={() => setActiveTab('youtube')}
+        >
+          <Youtube className="w-4 h-4 inline mr-2" />
+          Busca no YouTube
+        </button>
+        <button
+          className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'partituras'
+              ? 'bg-background shadow-sm text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+          onClick={() => setActiveTab('partituras')}
+        >
+          <FileText className="w-4 h-4 inline mr-2" />
+          Busca Inteligente de Partituras
+        </button>
       </div>
 
       {/* Busca */}
@@ -168,10 +195,13 @@ export function BuscarMusicas() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Busca Inteligente de Partituras
+            {activeTab === 'youtube' ? 'Busca de Músicas no YouTube' : 'Busca Inteligente de Partituras'}
           </CardTitle>
           <CardDescription>
-            Digite o nome da música para encontrar no YouTube, Cifras e Partituras da Arquidiocese de Goiânia
+            {activeTab === 'youtube' 
+              ? 'Encontre vídeos musicais no YouTube para adicionar à biblioteca'
+              : 'Digite o nome da música para encontrar partituras na Arquidiocese de Goiânia'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>

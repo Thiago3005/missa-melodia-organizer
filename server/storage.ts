@@ -48,6 +48,11 @@ export interface IStorage {
   
   // Indisponibilidades
   getIndisponibilidades(): Promise<any[]>;
+  
+  // Missa Musicos
+  getMissaMusicos(missaId: string): Promise<any[]>;
+  createMissaMusico(data: any): Promise<any>;
+  deleteMissaMusico(id: string): Promise<void>;
   getIndisponibilidadesByMusicoId(musicoId: string): Promise<any[]>;
   createIndisponibilidade(data: any): Promise<any>;
   updateIndisponibilidade(id: string, data: any): Promise<any>;
@@ -205,6 +210,46 @@ export class DatabaseStorage implements IStorage {
   async deleteIndisponibilidade(id: string): Promise<void> {
     await db.delete(musicoIndisponibilidade)
       .where(eq(musicoIndisponibilidade.id, id));
+  }
+
+  async getMissaMusicos(missaId: string): Promise<any[]> {
+    const result = await db
+      .select({
+        id: missaMusicos.id,
+        parte_missa: missaMusicos.parte_missa,
+        funcao: missaMusicos.funcao,
+        instrumento: missaMusicos.instrumento,
+        observacoes: missaMusicos.observacoes,
+        musico: {
+          id: musicos.id,
+          nome: musicos.nome,
+          funcao: musicos.funcao,
+          instrumento: musicos.email
+        }
+      })
+      .from(missaMusicos)
+      .leftJoin(musicos, eq(missaMusicos.musico_id, musicos.id))
+      .where(eq(missaMusicos.missa_id, missaId));
+    return result;
+  }
+
+  async createMissaMusico(data: any): Promise<any> {
+    const result = await db.insert(missaMusicos)
+      .values({
+        missa_id: data.missa_id,
+        musico_id: data.musico_id,
+        parte_missa: data.parte_missa,
+        funcao: data.funcao,
+        instrumento: data.instrumento,
+        observacoes: data.observacoes
+      })
+      .returning();
+    return result[0];
+  }
+
+  async deleteMissaMusico(id: string): Promise<void> {
+    await db.delete(missaMusicos)
+      .where(eq(missaMusicos.id, id));
   }
 }
 
