@@ -35,6 +35,15 @@ Sistema completo de gestão musical para a paróquia de Boa Viagem, focado na or
   - Enhanced music library with text-based sheet music storage
   - Database schema extensions for availability and music assignments
   - Improved UI for managing musician schedules and music resources
+- **2025-01-24**: Migration to Replit completed
+  - Updated admin credentials: wijosi59@gmail.com / 88928883
+  - Implemented intelligent music search with YouTube integration
+  - Added Cifras e Partituras - Arquidiocese de Goiânia integration
+  - Added CNV MP3 download service integration
+  - Enhanced biblioteca with text-based sheet music field
+  - Fixed header date duplication issue
+  - Added "Últimas da Igreja" section for parish updates
+  - Database fully migrated and functional
 
 ## Features
 - Dashboard com métricas principais e visão geral

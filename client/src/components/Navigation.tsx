@@ -17,7 +17,6 @@ interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   userType?: 'admin' | 'musico';
-  userType?: 'admin' | 'musico';
 }
 
 export function Navigation({ activeTab, onTabChange, userType = 'admin' }: NavigationProps) {

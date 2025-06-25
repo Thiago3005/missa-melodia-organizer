@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { authRouter } from "./authRoutes";
 import { authenticateToken, requireAdmin, type AuthenticatedRequest } from "./auth";
+import { MusicSearchService } from "./musicSearchService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -191,6 +192,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sugestao);
     } catch (error) {
       res.status(500).json({ error: "Failed to update sugestao" });
+    }
+  });
+
+  // Music search routes
+  app.get("/api/search/music", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ error: "Query parameter 'q' is required" });
+      }
+      
+      const results = await MusicSearchService.searchMusic(query);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to search music" });
+    }
+  });
+
+  app.post("/api/search/youtube-to-mp3", async (req, res) => {
+    try {
+      const { youtubeUrl } = req.body;
+      if (!youtubeUrl) {
+        return res.status(400).json({ error: "YouTube URL is required" });
+      }
+      
+      const mp3Link = MusicSearchService.generateCnvMp3Link(youtubeUrl);
+      res.json({ mp3Link });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate MP3 link" });
     }
   });
 

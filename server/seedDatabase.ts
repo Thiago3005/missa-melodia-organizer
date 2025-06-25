@@ -15,13 +15,13 @@ export async function seedDatabase() {
 
     if (existingAdmin.length === 0) {
       // Criar o primeiro admin
-      const adminPassword = 'admin123';
+      const adminPassword = '88928883';
       const hashedPassword = await hashPassword(adminPassword);
 
       await db
         .insert(authUsers)
         .values({
-          email: 'admin@paroquiaboaviagem.com',
+          email: 'wijosi59@gmail.com',
           password: hashedPassword,
           nome: 'Administrador',
           tipo: 'admin',
@@ -29,8 +29,8 @@ export async function seedDatabase() {
         });
 
       console.log('✅ Administrador inicial criado:');
-      console.log('📧 Email: admin@paroquiaboaviagem.com');
-      console.log('🔑 Senha: admin123');
+      console.log('📧 Email: wijosi59@gmail.com');
+      console.log('🔑 Senha: 88928883');
       console.log('⚠️  IMPORTANTE: Altere esta senha após o primeiro login!');
     }
 

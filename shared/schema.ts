@@ -60,10 +60,11 @@ export const musicas = pgTable("musicas", {
   nome: text("nome").notNull(),
   cantor: text("cantor"),
   link_youtube: text("link_youtube"),
-  partitura: text("partitura"),
+  partitura_texto: text("partitura_texto"),
   link_download: text("link_download"),
   secao_liturgica: text("secao_liturgica").notNull(),
   observacoes: text("observacoes"),
+  biblioteca_musica_id: uuid("biblioteca_musica_id").references(() => bibliotecaMusicas.id),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -73,13 +74,14 @@ export const bibliotecaMusicas = pgTable("biblioteca_musicas", {
   nome: text("nome").notNull(),
   cantor: text("cantor"),
   link_youtube: text("link_youtube"),
-  partitura: text("partitura"),
+  partitura_texto: text("partitura_texto"),
   link_download: text("link_download"),
   secao_liturgica: text("secao_liturgica"),
   observacoes: text("observacoes"),
   youtube_video_id: text("youtube_video_id"),
   thumbnail: text("thumbnail"),
   duracao: text("duracao"),
+  link_cifras_goiania: text("link_cifras_goiania"),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
